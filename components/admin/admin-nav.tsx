@@ -7,6 +7,7 @@ import { logoutAction } from "@/app/admin/actions";
 
 const ITEMS = [
   { href: "/admin/projetos", label: "Projetos" },
+  { href: "/admin/clientes", label: "Clientes" },
   { href: "/admin/sobre", label: "Sobre" },
 ];
 

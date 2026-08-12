@@ -3,8 +3,9 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Hero } from "@/components/sections/hero";
 import { ProjectGrid } from "@/components/sections/project-grid";
-import { ProjectMarquee } from "@/components/sections/project-marquee";
+import { ClientMarquee } from "@/components/sections/client-marquee";
 import { getPublishedProjects } from "@/lib/data/projects";
+import { getClients } from "@/lib/data/clients";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const projects = await getPublishedProjects();
+  const [projects, { clients }] = await Promise.all([getPublishedProjects(), getClients()]);
 
   return (
     <>
@@ -24,7 +25,7 @@ export default async function HomePage() {
           <h2 className="sr-only">Projetos</h2>
           <ProjectGrid projects={projects} />
         </section>
-        <ProjectMarquee projects={projects} />
+        <ClientMarquee clients={clients} />
       </main>
       <SiteFooter />
     </>

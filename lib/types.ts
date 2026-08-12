@@ -31,6 +31,21 @@ export interface Project {
   updated_at: string;
 }
 
+/**
+ * Cliente/marca exibido na vitrine de logos da Home ("Pra quem já escrevi").
+ * Independente do array `About.clients` (tags de texto em /sobre) — aqui é
+ * a logo em si, com sua própria ordem de exibição.
+ */
+export interface Client {
+  id: string;
+  name: string;
+  logo_url: string;
+  logo_alt: string;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface About {
   id: string;
   photo_url: string;

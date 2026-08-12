@@ -38,23 +38,27 @@ app/
 │   └── (dashboard)/              # grupo de rotas com nav do admin
 │       ├── layout.tsx
 │       ├── projetos/            # lista, novo, [id], form, server actions
+│       ├── clientes/            # lista + form de logos (sem página de edição)
 │       └── sobre/                # editar bio/foto/contatos
 ├── sitemap.ts / robots.ts
 components/
 ├── layout/        # header, footer públicos
-├── sections/       # hero, grid + marquee de projetos, card de projeto
+├── sections/       # hero, grid de projetos, vitrine de logos de clientes, card de projeto
 ├── motion/          # wrappers de framer-motion (fade-in, stagger, crossfade)
 ├── admin/            # nav do admin, banner de fallback, lista editável
 └── ui/                # shadcn/ui + marquee-along-svg-path, linkedin-icon
 lib/
 ├── types.ts
-├── data/            # camada de dados (projects, about) — ver abaixo
+├── data/            # camada de dados (projects, about, clients) — ver abaixo
 ├── supabase/         # clients (browser/server/middleware) + upload de imagem
-└── validation/        # schemas zod (projeto, sobre)
+└── validation/        # schemas zod (projeto, sobre, cliente)
 supabase/
 ├── migrations/0001_initial.sql   # schema completo + RLS + bucket de storage
+├── migrations/0002_imagens_reais.sql   # troca placeholders pelas peças reais
+├── migrations/0003_clientes.sql   # tabela `clients` + RLS + as 22 logos (self-contained)
 └── seed.sql                       # os 6 projetos reais + conteúdo de "Sobre"
 public/placeholders/               # SVGs gerados localmente (capa/hover/galeria de cada projeto)
+public/clients/                    # PNGs das 22 logos de clientes (vitrine da Home)
 ```
 
 ## Camada de dados com fallback (importante)
@@ -88,6 +92,9 @@ depender de nenhum backend configurado.
    - `supabase/seed.sql` (os 6 projetos reais + conteúdo de "Sobre")
    - `supabase/migrations/0002_imagens_reais.sql` (troca os placeholders
      pelas peças reais das campanhas, servidas de `public/projects/`)
+   - `supabase/migrations/0003_clientes.sql` (cria a tabela `clients` e já
+     insere as 22 logos servidas de `public/clients/` — arquivo único, não
+     precisa rodar nenhum seed separado para isso)
 
    Alternativa via CLI (se tiver o Supabase CLI instalado):
    ```bash
@@ -125,3 +132,8 @@ depender de nenhum backend configurado.
 - Trocar as imagens placeholder (`public/placeholders/*.svg`) pelas peças
   reais via `/admin/projetos/[id]` (upload direto para o bucket
   `project-images`).
+- Se o Supabase de produção já estiver conectado (variáveis preenchidas na
+  Vercel), rode `supabase/migrations/0003_clientes.sql` no SQL Editor antes
+  de usar `/admin/clientes` de verdade — sem a tabela `clients`, a vitrine
+  "Pra quem já escrevi" na Home continua funcionando (cai no fallback local
+  de `lib/data/seed.ts`, as mesmas 22 logos), mas o admin não salva nada.

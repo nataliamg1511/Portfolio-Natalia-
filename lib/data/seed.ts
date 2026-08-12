@@ -1,4 +1,4 @@
-import type { About, Project } from "@/lib/types";
+import type { About, Client, Project } from "@/lib/types";
 
 /**
  * Conteúdo seed local — usado como fallback enquanto o Supabase real da
@@ -251,3 +251,47 @@ export const seedAbout: About = {
   whatsapp_number: "5541985324358",
   updated_at: now,
 };
+
+/**
+ * Logos de clientes/marcas — vitrine "Pra quem já escrevi" na Home (ver
+ * components/sections/client-marquee.tsx). Ordem 1–22 é a mesma do site
+ * antigo. Arquivos em public/clients/*.png (mesmo padrão do
+ * public/placeholders usado pelos projetos: caminho local, sem depender do
+ * Supabase Storage).
+ */
+const CLIENT_NAMES: Array<[name: string, file: string]> = [
+  ["Above", "above"],
+  ["Unilever", "unilever"],
+  ["Electrolux", "electrolux"],
+  ["Ademicon", "ademicon"],
+  ["Eurofarma", "eurofarma"],
+  ["BeautyColor", "beautycolor"],
+  ["MSD Saúde Animal", "msd-saude-animal"],
+  ["Beneficência Portuguesa", "beneficencia-portuguesa"],
+  ["Suzano", "suzano"],
+  ["Coamo", "coamo"],
+  ["Sanepar", "sanepar"],
+  ["Grupo Muffato", "grupo-muffato"],
+  ["Prefeitura de Curitiba", "prefeitura-de-curitiba"],
+  ["Sepac", "sepac"],
+  ["Daju", "daju"],
+  ["Compagas", "compagas"],
+  ["Grupo Barigüi", "grupo-barigui"],
+  ["GT.Home ABC", "gt-home-abc"],
+  ["Minipreço", "minipreco"],
+  ["Pátio Batel", "patio-batel"],
+  ["Ser Educacional", "ser-educacional"],
+  ["Sonner", "sonner"],
+];
+
+export const seedClients: Client[] = CLIENT_NAMES.map(([name, file], index) => ({
+  id: `seed-client-${file}`,
+  name,
+  logo_url: `/clients/${file}.png`,
+  // "Grupo X" pede artigo masculino ("Logo do Grupo Muffato"); demais nomes
+  // de marca usam o feminino genérico ("Logo da Unilever").
+  logo_alt: `Logo d${name.startsWith("Grupo") ? "o" : "a"} ${name}`,
+  display_order: index + 1,
+  created_at: now,
+  updated_at: now,
+}));
