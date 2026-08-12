@@ -1,0 +1,232 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-archivo);
+  --font-mono: var(--font-jetbrains-mono);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 0.125rem);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 0.125rem);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+  --radius-2xl: calc(var(--radius) + 0.5rem);
+}
+
+:root {
+  /* Base — "papel", não branco clínico de SaaS */
+  --background: hsl(40 20% 98%);
+  --foreground: hsl(20 8% 12%);
+
+  --card: hsl(40 20% 98%);
+  --card-foreground: hsl(20 8% 12%);
+
+  --popover: hsl(40 20% 98%);
+  --popover-foreground: hsl(20 8% 12%);
+
+  --primary: hsl(20 8% 12%);
+  --primary-foreground: hsl(40 20% 98%);
+
+  --secondary: hsl(40 10% 94%);
+  --secondary-foreground: hsl(20 8% 12%);
+
+  --muted: hsl(40 8% 92%);
+  --muted-foreground: hsl(30 6% 38%);
+
+  /* Acento único: "vermelho de revisão" (terracota) */
+  --accent: hsl(8 55% 40%);
+  --accent-foreground: hsl(40 20% 98%);
+
+  --destructive: hsl(0 70% 48%);
+  --destructive-foreground: hsl(40 20% 98%);
+
+  --border: hsl(30 10% 87%);
+  --input: hsl(30 10% 87%);
+  --ring: hsl(8 55% 40%);
+
+  --radius: 0.25rem;
+
+  --sidebar: hsl(40 20% 98%);
+  --sidebar-foreground: hsl(20 8% 12%);
+  --sidebar-primary: hsl(20 8% 12%);
+  --sidebar-primary-foreground: hsl(40 20% 98%);
+  --sidebar-accent: hsl(40 10% 94%);
+  --sidebar-accent-foreground: hsl(20 8% 12%);
+  --sidebar-border: hsl(30 10% 87%);
+  --sidebar-ring: hsl(8 55% 40%);
+
+  --chart-1: hsl(8 55% 40%);
+  --chart-2: hsl(30 6% 38%);
+  --chart-3: hsl(20 8% 12%);
+  --chart-4: hsl(40 10% 70%);
+  --chart-5: hsl(40 10% 50%);
+}
+
+/* Não há dark mode neste produto (ver DESIGN_SYSTEM.md secão 2) */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans scroll-smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  /* Metadata mono editorial: Categoria · Ano · Cliente */
+  .meta-text {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  /* Link de ação com sublinhado que "escreve" da esquerda pra direita.
+     ::after = hairline estática (--border), sempre visível, é o traço base.
+     ::before = traço --accent que cresce de scaleX(0) a scaleX(1) a partir
+     da esquerda no hover/focus — a "caneta de revisão" passando por cima
+     do texto. Token motion-snap (180ms). */
+  .link-underline {
+    position: relative;
+    text-decoration: none;
+  }
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -0.125em;
+    width: 100%;
+    height: 1px;
+    background-color: var(--border);
+  }
+  .link-underline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -0.125em;
+    width: 100%;
+    height: 1px;
+    background-color: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 180ms cubic-bezier(0.3, 0, 0, 1);
+  }
+  .link-underline:hover::before,
+  .link-underline:focus-visible::before {
+    transform: scaleX(1);
+  }
+  /* Cards inteiros clicáveis (ex.: ProjectCard) usam `.group` do Tailwind —
+     o sublinhado/seta do label "Ver projeto →" deve reagir ao hover do
+     card inteiro, não só ao hover do texto pequeno, já que o card inteiro
+     é a área de clique real (DESIGN_SYSTEM.md seção 7.2). */
+  .group:hover .link-underline::before,
+  .group:focus-visible .link-underline::before {
+    transform: scaleX(1);
+  }
+
+  /* Seta de ação com micro-deslocamento no hover/focus — reforça "avançar"
+     sem recorrer a scale/bounce. Token motion-snap (180ms). */
+  .arrow-trailing,
+  .arrow-leading,
+  .arrow-up {
+    display: inline-block;
+    transition: transform 180ms cubic-bezier(0.3, 0, 0, 1);
+  }
+  a:hover .arrow-trailing,
+  a:focus-visible .arrow-trailing,
+  button:hover:not(:disabled) .arrow-trailing,
+  button:focus-visible .arrow-trailing,
+  .group:hover .arrow-trailing,
+  .group:focus-visible .arrow-trailing {
+    transform: translateX(3px);
+  }
+  a:hover .arrow-leading,
+  a:focus-visible .arrow-leading,
+  button:hover:not(:disabled) .arrow-leading,
+  button:focus-visible .arrow-leading {
+    transform: translateX(-3px);
+  }
+  a:hover .arrow-up,
+  a:focus-visible .arrow-up,
+  button:hover:not(:disabled) .arrow-up,
+  button:focus-visible .arrow-up {
+    transform: translateY(-3px);
+  }
+
+  .container-editorial {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .container-editorial {
+      padding-inline: 2.5rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .container-editorial {
+      padding-inline: 5rem;
+    }
+  }
+}
+
+/* Rede de segurança para prefers-reduced-motion: cobre transições/animações
+   CSS puras (sublinhado, seta, header no scroll, hovers) que não passam
+   pelo useReducedMotion() do framer-motion nos componentes de motion. As
+   animações do framer-motion já são desligadas na origem (ver
+   components/motion/*), então este bloco não as afeta duas vezes — apenas
+   garante que nada de CSS "puro" escape da regra. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

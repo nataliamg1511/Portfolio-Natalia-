@@ -1,0 +1,128 @@
+# CLAUDE.md — Portfólio Natália Machado
+
+Guia rápido do projeto para quem for mexer no código depois (humano ou agente).
+
+## Stack
+
+- **Next.js 15** (App Router, Turbopack) + **TypeScript**
+- **Tailwind CSS v4** (config CSS-first em `app/globals.css`, sem `tailwind.config.ts`)
+- **shadcn/ui** (estilo "Nova", baseado em Radix UI) + **lucide-react**
+- **framer-motion** — toda animação segue os tokens de `DESIGN_SYSTEM.md` seção 5
+- **react-hook-form + zod** — validação de formulários (contato e admin)
+- **@supabase/supabase-js + @supabase/ssr** — Auth, Database, Storage (opcional, ver abaixo)
+
+## Comandos
+
+```bash
+npm run dev      # ambiente de desenvolvimento (http://localhost:3000)
+npm run build    # build de produção — rode sempre antes de publicar
+npm run start    # roda o build de produção localmente
+npm run lint      # ESLint
+npx shadcn@latest add [componente]   # adicionar novo componente shadcn/ui
+```
+
+## Estrutura
+
+```
+app/
+├── page.tsx                     # Home (hero + grid de projetos)
+├── template.tsx                 # fade de transição entre páginas
+├── projetos/[slug]/page.tsx     # case individual
+├── sobre/page.tsx
+├── contato/
+│   ├── page.tsx
+│   ├── contact-form.tsx         # client component (react-hook-form + zod)
+│   └── actions.ts               # server action que grava em `messages`
+├── admin/
+│   ├── page.tsx                 # login (fora do grupo (dashboard))
+│   ├── login-form.tsx
+│   ├── actions.ts                # login / logout / recuperação de senha
+│   └── (dashboard)/              # grupo de rotas com nav do admin
+│       ├── layout.tsx
+│       ├── projetos/            # lista, novo, [id], form, server actions
+│       ├── sobre/                # editar bio/foto/contatos
+│       └── mensagens/            # inbox do formulário de contato
+├── sitemap.ts / robots.ts
+components/
+├── layout/        # header, footer públicos
+├── sections/       # hero, grid e card de projeto
+├── motion/          # wrappers de framer-motion (fade-in, stagger, crossfade)
+├── admin/            # nav do admin, banner de fallback, lista editável
+└── ui/                # shadcn/ui
+lib/
+├── types.ts
+├── data/            # camada de dados (projects, about, messages) — ver abaixo
+├── supabase/         # clients (browser/server/middleware) + upload de imagem
+└── validation/        # schemas zod (contato, projeto, sobre)
+supabase/
+├── migrations/0001_initial.sql   # schema completo + RLS + bucket de storage
+└── seed.sql                       # os 6 projetos reais + conteúdo de "Sobre"
+public/placeholders/               # SVGs gerados localmente (capa/hover/galeria de cada projeto)
+```
+
+## Camada de dados com fallback (importante)
+
+O Supabase real da Natália **ainda não existe** — ela vai criar a própria conta
+gratuita depois. Por isso toda a camada em `lib/data/*.ts` funciona em dois
+modos, decididos por `lib/supabase/is-configured.ts`:
+
+- **Sem `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` preenchidas**
+  (estado atual): o site público lê os dados de `lib/data/seed.ts` (os 6
+  projetos reais + bio). O formulário de contato "funciona" (mostra sucesso),
+  mas não persiste nada. `/admin/*` mostra um aviso "Conecte o Supabase para
+  ativar o painel" e os formulários ficam só de pré-visualização (não há
+  onde salvar).
+- **Com as variáveis preenchidas**: tudo passa a usar o Postgres/Auth/Storage
+  do Supabase de verdade — CRUD completo de projetos, upload de imagem,
+  login, mensagens.
+
+Isso significa que `npm run dev` já mostra o site completo hoje, sem
+depender de nenhum backend configurado.
+
+## Como conectar o Supabase real (quando a Natália criar a conta)
+
+1. **Criar o projeto**: acesse [supabase.com](https://supabase.com), crie uma
+   conta gratuita e um novo projeto (escolha uma região próxima, ex. São
+   Paulo/`sa-east-1`).
+2. **Rodar o schema**: no painel do Supabase, abra **SQL Editor** e execute,
+   nesta ordem, o conteúdo de:
+   - `supabase/migrations/0001_initial.sql` (tabelas, índices, RLS, bucket
+     `project-images` no Storage)
+   - `supabase/seed.sql` (os 6 projetos reais + conteúdo de "Sobre")
+
+   Alternativa via CLI (se tiver o Supabase CLI instalado):
+   ```bash
+   supabase link --project-ref <ref-do-projeto>
+   supabase db push
+   psql "<connection-string>" -f supabase/seed.sql
+   ```
+3. **Criar o usuário único do admin**: em **Authentication → Users → Add
+   user**, crie o e-mail/senha da Natália manualmente (não existe
+   autocadastro no site — é intencional).
+4. **Pegar as chaves**: em **Project Settings → API**, copie a **Project URL**
+   e a **anon public key**.
+5. **Preencher `.env.local`** (na raiz do projeto):
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+   NEXT_PUBLIC_SITE_URL=https://nataliamachado.com.br
+   ```
+6. **Reiniciar** `npm run dev` (ou fazer novo deploy). A partir daqui,
+   `/admin` aceita login de verdade e todo o CRUD passa a persistir no
+   Supabase.
+7. Em produção (Vercel, Netlify etc.), configure as mesmas variáveis de
+   ambiente no painel do provedor de hosting.
+
+## Pontos a revisar com a Natália depois de conectar o Supabase
+
+- `about.resume_url` está vazio no seed — sem isso, o botão de currículo em
+  `/sobre` fica escondido (mostra "Currículo em breve"). Preencher em
+  `/admin/sobre`.
+- `about.linkedin_url` no seed é um palpite (`linkedin.com/in/nataliamachado`)
+  — confirmar/corrigir o link real em `/admin/sobre`.
+- Os textos de case (contexto/desafio/solução/resultado) dos 6 projetos seed
+  foram escritos com base nos nomes de campanha do briefing, mas vale a
+  Natália revisar cada um e ajustar para o relato exato de cada case.
+- Trocar as imagens placeholder (`public/placeholders/*.svg`) pelas peças
+  reais via `/admin/projetos/[id]` (upload direto para o bucket
+  `project-images`).

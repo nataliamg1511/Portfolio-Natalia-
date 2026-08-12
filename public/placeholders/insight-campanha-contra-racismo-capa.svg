@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <rect width="1200" height="900" fill="#FAF8F4"/>
+  <rect x="0" y="0" width="1200" height="900" fill="none" stroke="#DCD6CB" stroke-width="2"/>
+  <line x1="72" y1="72" x2="1128" y2="72" stroke="#DCD6CB" stroke-width="1"/>
+  <line x1="72" y1="828" x2="1128" y2="828" stroke="#DCD6CB" stroke-width="1"/>
+  <rect x="72" y="72" width="6" height="756" fill="#9C4530"/>
+  <circle cx="1092" cy="108" r="5" fill="#9C4530"/>
+  <text x="96" y="140" font-family="'Courier New', monospace" font-size="18" font-weight="700" letter-spacing="3" fill="#635C54">CAMPANHA INSTITUCIONAL · 2020</text>
+  <g>
+    <text x="96" y="378.32" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="500" fill="#221E1B" letter-spacing="-1">Insight —</text>
+    <text x="96" y="450" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="500" fill="#221E1B" letter-spacing="-1">Campanha contra</text>
+    <text x="96" y="521.6800000000001" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="500" fill="#221E1B" letter-spacing="-1">o Racismo</text>
+  </g>
+  
+  <text x="1104" y="800" text-anchor="end" font-family="'Courier New', monospace" font-size="14" letter-spacing="2" fill="#635C54">NATALIA MACHADO — REDATORA</text>
+</svg>
