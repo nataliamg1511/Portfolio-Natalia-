@@ -15,7 +15,7 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
   return (
     <Link
       href={`/projetos/${project.slug}`}
-      className="group grid grid-cols-1 gap-6 rounded-none outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center lg:gap-12"
+      className="group -m-4 grid grid-cols-1 gap-6 rounded-none p-4 outline-none transition-colors duration-[350ms] ease-[cubic-bezier(0.3,0,0,1)] hover:bg-[#da9a9c] focus-visible:bg-[#da9a9c] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background md:-m-8 md:p-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center lg:gap-12"
     >
       <div className="order-last lg:order-first">
         <h3 className="font-display text-2xl font-medium tracking-[-0.01em] text-foreground md:text-3xl">
