@@ -3,10 +3,9 @@ import { ProjectCard } from "@/components/sections/project-card";
 import type { Project } from "@/lib/types";
 
 /**
- * Grid de projetos da Home — cards horizontais grandes (referência
- * bitagoli.com): 2 colunas no desktop, 1 na coluna única mobile/tablet,
- * gap generoso (`gap-x-10 gap-y-20`, mais respiro vertical que horizontal).
- * Estado vazio amigável conforme UX_ARCHITECTURE.md seção 6.
+ * Lista de projetos da Home — um card por linha (referência bitagoli.com):
+ * texto à esquerda + imagem grande à direita, com muito respiro vertical
+ * entre projetos. Estado vazio amigável conforme UX_ARCHITECTURE.md seção 6.
  */
 export function ProjectGrid({ projects }: { projects: Project[] }) {
   if (projects.length === 0) {
@@ -18,7 +17,7 @@ export function ProjectGrid({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <StaggerContainer className="grid grid-cols-1 gap-x-10 gap-y-20 lg:grid-cols-2 lg:gap-y-24">
+    <StaggerContainer className="grid grid-cols-1 gap-y-20 md:gap-y-28">
       {projects.map((project, index) => (
         <StaggerItem key={project.id}>
           <ProjectCard project={project} priority={index < 2} />

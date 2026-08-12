@@ -16,13 +16,13 @@ export function Hero() {
     <section className="container-editorial py-24 md:py-32 lg:py-40">
       <FadeIn>
         <h1 className="font-display text-[2.75rem] leading-[1.05] font-medium tracking-[-0.02em] text-foreground md:text-[4.5rem]">
-          Oi, eu sou a Nat.
+          Oi, eu sou a Natália.
           <br />
           Redatora e Copywriter.
         </h1>
       </FadeIn>
       <FadeIn delay={0.08}>
-        <div className="mt-8 flex items-center gap-6">
+        <div className="mt-8 flex flex-col items-start gap-5">
           <ArrowLink href="/sobre">Sobre mim</ArrowLink>
           <div className="flex items-center gap-4">
             <a
