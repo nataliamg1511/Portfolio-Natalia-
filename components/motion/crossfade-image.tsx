@@ -15,10 +15,7 @@ interface CrossfadeImageProps {
 
 /**
  * Card de projeto — crossfade puro de opacity (350ms) entre imagem de capa
- * e imagem de hover (token `motion-card-hover`, sem scale/translate no
- * crossfade em si). O card inteiro (referência bitagoli.com) ganha um leve
- * zoom de destaque no hover/focus (scale 1.03, 350ms, mesmo easing) — o
- * container `overflow-hidden` garante que o zoom fique contido na imagem.
+ * e imagem de hover (token `motion-card-hover`, sem scale/translate).
  * Em touch (sem hover) permanece na capa, estática.
  */
 export function CrossfadeImage({ src, hoverSrc, alt, hoverAlt, sizes, priority }: CrossfadeImageProps) {
@@ -26,9 +23,7 @@ export function CrossfadeImage({ src, hoverSrc, alt, hoverAlt, sizes, priority }
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div
-      className="relative h-full w-full overflow-hidden bg-secondary transition-transform ease-[cubic-bezier(0.4,0,0.2,1)] motion-safe:duration-[350ms] motion-safe:group-hover:scale-[1.03] motion-safe:group-focus-visible:scale-[1.03]"
-    >
+    <div className="relative h-full w-full overflow-hidden bg-secondary">
       <Image
         src={src}
         alt={alt}

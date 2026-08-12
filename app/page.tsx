@@ -21,7 +21,7 @@ export default async function HomePage() {
       <SiteHeader />
       <main id="main-content">
         <Hero />
-        <section id="projetos" className="container-editorial pb-24 pt-8 md:pb-40">
+        <section id="projetos" className="w-full px-6 pb-24 pt-8 md:px-10 md:pb-40">
           <h2 className="sr-only">Projetos</h2>
           <ProjectGrid projects={projects} />
         </section>

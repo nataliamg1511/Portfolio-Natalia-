@@ -15,14 +15,16 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
   return (
     <Link
       href={`/projetos/${project.slug}`}
-      className="group -m-4 grid grid-cols-1 gap-6 rounded-none p-4 outline-none transition-colors duration-[350ms] ease-[cubic-bezier(0.3,0,0,1)] hover:bg-[#da9a9c] focus-visible:bg-[#da9a9c] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background md:-m-8 md:p-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center lg:gap-12"
+      className="group grid grid-cols-1 gap-6 rounded-none outline-none transition-colors duration-[350ms] ease-[cubic-bezier(0.3,0,0,1)] hover:bg-[#da9a9c] focus-visible:bg-[#da9a9c] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center lg:gap-12"
     >
-      <div className="order-last lg:order-first">
-        <h3 className="font-display text-2xl font-medium tracking-[-0.01em] text-foreground md:text-3xl">
+      <div className="order-last pb-4 lg:order-first lg:py-8 lg:pl-8">
+        <h3 className="font-display text-3xl font-medium tracking-[-0.01em] text-foreground transition-colors duration-[350ms] group-hover:text-white group-focus-visible:text-white md:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
           {project.title}
         </h3>
-        <p className="meta-text mt-3">{formatMeta([project.category, project.year])}</p>
-        <span className="link-underline mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+        <p className="meta-text mt-4 transition-colors duration-[350ms] group-hover:text-white/90 group-focus-visible:text-white/90">
+          {formatMeta([project.category, project.year])}
+        </p>
+        <span className="link-underline mt-6 inline-flex items-center gap-1.5 text-base font-medium text-foreground transition-colors duration-[350ms] group-hover:text-white group-focus-visible:text-white">
           <span>Ver projeto</span>
           <span className="arrow-trailing" aria-hidden>
             →
