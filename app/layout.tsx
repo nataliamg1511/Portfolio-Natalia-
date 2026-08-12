@@ -30,18 +30,18 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nataliamachado.com.
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Natália Machado — Redatora Publicitária",
+    default: "Natália Machado — Redatora e Copywriter",
     template: "%s · Natália Machado",
   },
   description:
-    "Portfólio de Natália Machado, redatora publicitária em Curitiba/PR. Cases premiados (ADVB/PR), contas institucionais de grande porte e um jeito direto de escrever.",
+    "Portfólio de Natália Machado, redatora e copywriter em Curitiba/PR. Cases premiados (ADVB/PR), contas institucionais de grande porte e um jeito direto de escrever.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Natália Machado — Redatora Publicitária",
+    title: "Natália Machado — Redatora e Copywriter",
     description:
-      "Portfólio de Natália Machado, redatora publicitária em Curitiba/PR. Cases premiados e contas institucionais de grande porte.",
+      "Portfólio de Natália Machado, redatora e copywriter em Curitiba/PR. Cases premiados e contas institucionais de grande porte.",
     url: siteUrl,
     siteName: "Natália Machado",
     locale: "pt_BR",
@@ -49,9 +49,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Natália Machado — Redatora Publicitária",
+    title: "Natália Machado — Redatora e Copywriter",
     description:
-      "Portfólio de Natália Machado, redatora publicitária em Curitiba/PR.",
+      "Portfólio de Natália Machado, redatora e copywriter em Curitiba/PR.",
   },
   robots: {
     index: true,

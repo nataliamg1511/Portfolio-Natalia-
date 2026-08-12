@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Hero } from "@/components/sections/hero";
 import { ProjectGrid } from "@/components/sections/project-grid";
+import { ProjectMarquee } from "@/components/sections/project-marquee";
 import { getPublishedProjects } from "@/lib/data/projects";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default async function HomePage() {
           <h2 className="sr-only">Projetos</h2>
           <ProjectGrid projects={projects} />
         </section>
+        <ProjectMarquee projects={projects} />
       </main>
       <SiteFooter />
     </>

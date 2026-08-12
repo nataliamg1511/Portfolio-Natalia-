@@ -8,7 +8,7 @@ import { getAbout } from "@/lib/data/about";
 
 export const metadata: Metadata = {
   title: "Sobre",
-  description: "Quem é a Natália Machado — redatora publicitária, contas atendidas, ferramentas e currículo.",
+  description: "Quem é a Natália Machado — redatora e copywriter, contas atendidas, ferramentas e currículo.",
   alternates: { canonical: "/sobre" },
 };
 

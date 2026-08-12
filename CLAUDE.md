@@ -30,9 +30,7 @@ app/
 ├── projetos/[slug]/page.tsx     # case individual
 ├── sobre/page.tsx
 ├── contato/
-│   ├── page.tsx
-│   ├── contact-form.tsx         # client component (react-hook-form + zod)
-│   └── actions.ts               # server action que grava em `messages`
+│   └── page.tsx                 # canais diretos (LinkedIn + e-mail), sem formulário
 ├── admin/
 │   ├── page.tsx                 # login (fora do grupo (dashboard))
 │   ├── login-form.tsx
@@ -40,20 +38,19 @@ app/
 │   └── (dashboard)/              # grupo de rotas com nav do admin
 │       ├── layout.tsx
 │       ├── projetos/            # lista, novo, [id], form, server actions
-│       ├── sobre/                # editar bio/foto/contatos
-│       └── mensagens/            # inbox do formulário de contato
+│       └── sobre/                # editar bio/foto/contatos
 ├── sitemap.ts / robots.ts
 components/
 ├── layout/        # header, footer públicos
-├── sections/       # hero, grid e card de projeto
+├── sections/       # hero, grid + marquee de projetos, card de projeto
 ├── motion/          # wrappers de framer-motion (fade-in, stagger, crossfade)
 ├── admin/            # nav do admin, banner de fallback, lista editável
-└── ui/                # shadcn/ui
+└── ui/                # shadcn/ui + marquee-along-svg-path, linkedin-icon
 lib/
 ├── types.ts
-├── data/            # camada de dados (projects, about, messages) — ver abaixo
+├── data/            # camada de dados (projects, about) — ver abaixo
 ├── supabase/         # clients (browser/server/middleware) + upload de imagem
-└── validation/        # schemas zod (contato, projeto, sobre)
+└── validation/        # schemas zod (projeto, sobre)
 supabase/
 ├── migrations/0001_initial.sql   # schema completo + RLS + bucket de storage
 └── seed.sql                       # os 6 projetos reais + conteúdo de "Sobre"

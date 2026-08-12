@@ -282,7 +282,7 @@ export const seedAbout: About = {
     "Publi Manager",
   ],
   resume_url: "",
-  linkedin_url: "https://www.linkedin.com/in/nataliamachado",
+  linkedin_url: "https://www.linkedin.com/in/natalia-machado-gumerato/",
   email: "nataliamg.1511@gmail.com",
   whatsapp_number: "5541985324358",
   updated_at: now,

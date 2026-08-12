@@ -8,7 +8,6 @@ import { logoutAction } from "@/app/admin/actions";
 const ITEMS = [
   { href: "/admin/projetos", label: "Projetos" },
   { href: "/admin/sobre", label: "Sobre" },
-  { href: "/admin/mensagens", label: "Mensagens" },
 ];
 
 export function AdminNav() {

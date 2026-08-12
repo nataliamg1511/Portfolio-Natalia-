@@ -26,9 +26,3 @@ export function formatDateTime(iso: string): string {
     return iso;
   }
 }
-
-export function whatsappLink(number: string, text?: string): string {
-  const digits = number.replace(/\D/g, "");
-  const base = `https://wa.me/${digits}`;
-  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
-}

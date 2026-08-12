@@ -16,7 +16,7 @@ insert into public.about (
   '["Prefeitura de Curitiba", "DETRAN-PR", "Campanhas institucionais de grande alcance", "Varejo"]'::jsonb,
   '["ChatGPT", "Gemini", "Claude", "Perplexity", "Grok", "Trello", "Notion", "Publi Manager"]'::jsonb,
   '',
-  'https://www.linkedin.com/in/nataliamachado',
+  'https://www.linkedin.com/in/natalia-machado-gumerato/',
   'nataliamg.1511@gmail.com',
   '5541985324358'
 )
