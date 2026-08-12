@@ -1,10 +1,12 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { seedAbout } from "@/lib/data/seed";
 import type { About } from "@/lib/types";
 
+/** Leitura pública — cliente sem cookies, seguro em geração estática. */
 export async function getAbout(): Promise<{ about: About; usingFallback: boolean }> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   if (!supabase) {
     return { about: seedAbout, usingFallback: true };

@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { seedProjects } from "@/lib/data/seed";
 import type { GalleryImage, Project, ProjectStatus } from "@/lib/types";
@@ -8,9 +9,12 @@ function sortByOrder<T extends { display_order: number }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.display_order - b.display_order);
 }
 
-/** Home pública: só projetos publicados, ordenados por display_order. */
+/**
+ * Home pública: só projetos publicados, ordenados por display_order.
+ * Usa o cliente público (sem cookies) porque roda em geração estática.
+ */
 export async function getPublishedProjects(): Promise<Project[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   if (!supabase) {
     return sortByOrder(seedProjects.filter((p) => p.status === "published"));
@@ -30,9 +34,12 @@ export async function getPublishedProjects(): Promise<Project[]> {
   return data.map(mapProjectRow);
 }
 
-/** Página de case: busca por slug, só retorna se publicado. */
+/**
+ * Página de case: busca por slug, só retorna se publicado.
+ * Usa o cliente público (sem cookies) porque roda em geração estática.
+ */
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   if (!supabase) {
     const found = seedProjects.find((p) => p.slug === slug && p.status === "published");
