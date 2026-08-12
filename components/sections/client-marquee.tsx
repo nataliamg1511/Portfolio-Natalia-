@@ -5,10 +5,13 @@ import { useReducedMotion } from "framer-motion";
 import MarqueeAlongSvgPath from "@/components/ui/marquee-along-svg-path";
 import type { Client } from "@/lib/types";
 
-// Curva suave inspirada na demo do componente — puramente decorativa, sem
-// significado semântico; só dá "trilha" para as logos fluírem.
+// Serpentina longa (3 faixas onduladas) — o comprimento do caminho é o que
+// define o respiro entre as logos: 22 tiles de ~128px precisam de ~5000px
+// de trilha para não se sobreporem.
 const PATH =
-  "M1 209.434C58.5872 255.935 387.926 325.938 482.583 209.434C600.905 63.8051 525.516 -43.2211 427.332 19.9613C329.149 83.1436 352.902 242.723 515.041 267.302C644.752 286.966 943.56 181.94 995 156.5";
+  "M20 90 C 500 190, 1100 -10, 1580 90 C 1650 120, 1650 220, 1580 250 C 1100 350, 500 150, 20 250 C -50 280, -50 380, 20 410 C 500 510, 1100 310, 1580 410";
+
+const VIEW_BOX = "0 0 1600 500";
 
 const LOGO_TILE_CLASS =
   "flex h-20 w-32 shrink-0 items-center justify-center rounded-[0.25rem] border border-border bg-background p-3 transition-transform duration-180 ease-[cubic-bezier(0.3,0,0,1)] hover:scale-110 md:h-24 md:w-40";
@@ -67,13 +70,13 @@ export function ClientMarquee({ clients }: ClientMarqueeProps) {
   return (
     <section className="overflow-hidden border-t border-border py-24 md:py-32">
       <div className="container-editorial">{heading}</div>
-      <div className="mx-auto mt-10 h-[240px] w-full max-w-[1440px] px-6 md:h-[320px] md:px-10">
+      <div className="mx-auto mt-10 h-[280px] w-full max-w-[1440px] px-6 md:h-[460px] md:px-10">
         <MarqueeAlongSvgPath
           path={PATH}
-          viewBox="0 0 996 330"
-          baseVelocity={5}
+          viewBox={VIEW_BOX}
+          baseVelocity={2}
           slowdownOnHover
-          repeat={2}
+          repeat={1}
           responsive
           className="h-full w-full"
         >
