@@ -11,6 +11,9 @@ interface CrossfadeImageProps {
   hoverAlt?: string | null;
   sizes?: string;
   priority?: boolean;
+  /** `object-position` CSS ("X% Y%") escolhido no admin — default centro. */
+  position?: string;
+  hoverPosition?: string;
 }
 
 /**
@@ -18,7 +21,16 @@ interface CrossfadeImageProps {
  * e imagem de hover (token `motion-card-hover`, sem scale/translate).
  * Em touch (sem hover) permanece na capa, estática.
  */
-export function CrossfadeImage({ src, hoverSrc, alt, hoverAlt, sizes, priority }: CrossfadeImageProps) {
+export function CrossfadeImage({
+  src,
+  hoverSrc,
+  alt,
+  hoverAlt,
+  sizes,
+  priority,
+  position = "50% 50%",
+  hoverPosition = "50% 50%",
+}: CrossfadeImageProps) {
   const shouldReduceMotion = useReducedMotion();
   const [loaded, setLoaded] = useState(false);
 
@@ -31,6 +43,7 @@ export function CrossfadeImage({ src, hoverSrc, alt, hoverAlt, sizes, priority }
         priority={priority}
         sizes={sizes ?? "(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"}
         className="object-cover"
+        style={{ objectPosition: position }}
         onLoad={() => setLoaded(true)}
       />
       {hoverSrc && (
@@ -47,6 +60,7 @@ export function CrossfadeImage({ src, hoverSrc, alt, hoverAlt, sizes, priority }
             fill
             sizes={sizes ?? "(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"}
             className="object-cover"
+            style={{ objectPosition: hoverPosition }}
           />
         </motion.div>
       )}

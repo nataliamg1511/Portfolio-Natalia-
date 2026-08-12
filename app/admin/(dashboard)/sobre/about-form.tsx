@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EditableList } from "@/components/admin/editable-list";
+import { ImagePositionPicker } from "@/components/admin/image-position-picker";
 import { uploadProjectImage } from "@/lib/supabase/upload";
 import { saveAboutAction, type AboutFormState } from "@/app/admin/(dashboard)/sobre/actions";
 import type { About } from "@/lib/types";
@@ -20,6 +21,7 @@ const initialState: AboutFormState = { ok: false };
 export function AboutForm({ about, supabaseConfigured }: { about: About; supabaseConfigured: boolean }) {
   const [state, formAction, isPending] = useActionState(saveAboutAction, initialState);
   const [photoUrl, setPhotoUrl] = useState(about.photo_url);
+  const [photoPosition, setPhotoPosition] = useState(about.photo_position ?? "50% 50%");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,6 +80,18 @@ export function AboutForm({ about, supabaseConfigured }: { about: About; supabas
           <Input id="photo_alt" name="photo_alt" defaultValue={about.photo_alt} required />
           {state.fieldErrors?.photo_alt && <FieldError message={state.fieldErrors.photo_alt} />}
         </div>
+        {photoUrl && (
+          <div className="max-w-48 space-y-2">
+            <Label>Enquadramento em /sobre</Label>
+            <ImagePositionPicker
+              imageUrl={photoUrl}
+              aspectRatio={4 / 5}
+              value={photoPosition}
+              onChange={setPhotoPosition}
+            />
+          </div>
+        )}
+        <input type="hidden" name="photo_position" value={photoPosition} />
       </section>
 
       <Separator />

@@ -104,8 +104,10 @@ export interface ProjectInput {
   award: string | null;
   cover_image_url: string;
   cover_image_alt: string;
+  cover_image_position: string;
   hover_image_url: string | null;
   hover_image_alt: string | null;
+  hover_image_position: string;
   context_text: string;
   challenge_text: string;
   solution_text: string;
@@ -158,6 +160,7 @@ export async function updateProject(id: string, input: ProjectInput) {
 export interface GalleryImageInput {
   image_url: string;
   alt_text: string;
+  position: string;
 }
 
 /** Substitui toda a galeria de um projeto (mais simples que CRUD incremental). */
@@ -180,6 +183,7 @@ export async function replaceProjectGallery(projectId: string, images: GalleryIm
     project_id: projectId,
     image_url: image.image_url,
     alt_text: image.alt_text,
+    position: image.position || "50% 50%",
     display_order: index + 1,
   }));
 
@@ -233,12 +237,16 @@ export function isFallbackMode() {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapProjectRow(row: any): Project {
+  // `?? "50% 50%"` é crítico aqui: se a migration 0004 (colunas de posição)
+  // ainda não tiver rodado no Supabase de produção, `select("*")` simplesmente
+  // não traz esses campos (undefined) — sem o fallback, o site quebraria.
   const gallery: GalleryImage[] = (row.project_gallery_images ?? [])
     .map((g: GalleryImage) => ({
       id: g.id,
       project_id: g.project_id,
       image_url: g.image_url,
       alt_text: g.alt_text,
+      position: g.position ?? "50% 50%",
       display_order: g.display_order,
     }))
     .sort((a: GalleryImage, b: GalleryImage) => a.display_order - b.display_order);
@@ -253,8 +261,10 @@ function mapProjectRow(row: any): Project {
     award: row.award,
     cover_image_url: row.cover_image_url,
     cover_image_alt: row.cover_image_alt ?? row.title,
+    cover_image_position: row.cover_image_position ?? "50% 50%",
     hover_image_url: row.hover_image_url,
     hover_image_alt: row.hover_image_alt,
+    hover_image_position: row.hover_image_position ?? "50% 50%",
     context_text: row.context_text,
     challenge_text: row.challenge_text,
     solution_text: row.solution_text,

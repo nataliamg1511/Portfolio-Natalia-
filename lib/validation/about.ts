@@ -1,8 +1,17 @@
 import { z } from "zod";
 
+const positionRegex = /^-?\d+(?:\.\d+)?%\s+-?\d+(?:\.\d+)?%$/;
+
+/** "X% Y%" (CSS `object-position`) — cai pro centro em valor vazio/inesperado. */
+const positionSchema = z
+  .string()
+  .trim()
+  .transform((v) => (positionRegex.test(v) ? v : "50% 50%"));
+
 export const aboutSchema = z.object({
   photo_url: z.string().trim().min(1, "Envie a foto."),
   photo_alt: z.string().trim().min(1, "Descreva a foto (texto alternativo)."),
+  photo_position: positionSchema,
   bio_main_text: z.string().trim().min(1, "Preencha o texto \"Quem é a Nat?\"."),
   bio_secondary_text: z.string().trim().min(1, "Preencha o texto \"Um relacionamento\"."),
   resume_url: z.string().trim().optional().default(""),

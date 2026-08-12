@@ -96,6 +96,7 @@ export default async function ProjectPage({ params }: PageProps) {
               priority
               sizes="100vw"
               className="object-cover"
+              style={{ objectPosition: project.cover_image_position }}
             />
           </div>
         </FadeIn>
@@ -119,6 +120,7 @@ export default async function ProjectPage({ params }: PageProps) {
                       fill
                       sizes="(min-width: 1024px) 900px, 100vw"
                       className="object-cover"
+                      style={{ objectPosition: gallery[index].position }}
                     />
                   </div>
                 </FadeIn>
@@ -137,6 +139,7 @@ export default async function ProjectPage({ params }: PageProps) {
                   fill
                   sizes="(min-width: 1024px) 900px, 100vw"
                   className="object-cover"
+                  style={{ objectPosition: image.position }}
                 />
               </div>
             </FadeIn>
@@ -160,6 +163,7 @@ export default async function ProjectPage({ params }: PageProps) {
                     fill
                     sizes="96px"
                     className="object-cover transition-opacity duration-180 group-hover:opacity-85"
+                    style={{ objectPosition: previousProject.cover_image_position }}
                   />
                 </div>
                 <div>
@@ -198,6 +202,7 @@ export default async function ProjectPage({ params }: PageProps) {
                     fill
                     sizes="96px"
                     className="object-cover transition-opacity duration-180 group-hover:opacity-85"
+                    style={{ objectPosition: nextProject.cover_image_position }}
                   />
                 </div>
               </Link>

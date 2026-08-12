@@ -24,6 +24,9 @@ export async function getAbout(): Promise<{ about: About; usingFallback: boolean
       id: data.id,
       photo_url: data.photo_url ?? seedAbout.photo_url,
       photo_alt: data.photo_alt ?? seedAbout.photo_alt,
+      // `?? "50% 50%"` cobre o período antes da migration 0004 rodar em
+      // produção — sem a coluna, `select("*")` não traz o campo.
+      photo_position: data.photo_position ?? "50% 50%",
       bio_main_text: data.bio_main_text ?? "",
       bio_secondary_text: data.bio_secondary_text ?? "",
       clients: data.clients ?? [],
@@ -41,6 +44,7 @@ export async function getAbout(): Promise<{ about: About; usingFallback: boolean
 export interface AboutInput {
   photo_url: string;
   photo_alt: string;
+  photo_position: string;
   bio_main_text: string;
   bio_secondary_text: string;
   clients: string[];

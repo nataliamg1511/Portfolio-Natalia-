@@ -34,6 +34,7 @@ export default async function SobrePage() {
                 fill
                 sizes="(min-width: 768px) 340px, 100vw"
                 className="object-cover"
+                style={{ objectPosition: about.photo_position }}
                 priority
               />
             </div>

@@ -5,6 +5,8 @@ export interface GalleryImage {
   project_id: string;
   image_url: string;
   alt_text: string;
+  /** `object-position` CSS ("X% Y%") — imagem renderizada com crop fixo (4:3) no case. */
+  position: string;
   display_order: number;
 }
 
@@ -18,8 +20,12 @@ export interface Project {
   award: string | null;
   cover_image_url: string;
   cover_image_alt: string;
+  /** `object-position` CSS ("X% Y%") — enquadramento escolhido no admin. */
+  cover_image_position: string;
   hover_image_url: string | null;
   hover_image_alt: string | null;
+  /** `object-position` CSS ("X% Y%") — enquadramento escolhido no admin. */
+  hover_image_position: string;
   context_text: string;
   challenge_text: string;
   solution_text: string;
@@ -50,6 +56,8 @@ export interface About {
   id: string;
   photo_url: string;
   photo_alt: string;
+  /** `object-position` CSS ("X% Y%") — enquadramento escolhido no admin. */
+  photo_position: string;
   bio_main_text: string;
   bio_secondary_text: string;
   clients: string[];

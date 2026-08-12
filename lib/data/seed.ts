@@ -19,8 +19,10 @@ export const seedProjects: Project[] = [
     award: "Top of Marketing ADVB/PR",
     cover_image_url: "/projects/100vezesmaxim/capa.webp",
     cover_image_alt: "Peça-chave da campanha #100vezesMaxim para a Toalha de Papel Maxim (Sepac).",
+    cover_image_position: "50% 50%",
     hover_image_url: "/projects/100vezesmaxim/hover.webp",
     hover_image_alt: "Peça da campanha #100vezesMaxim com os diferentes usos da toalha de papel.",
+    hover_image_position: "50% 50%",
     context_text:
       "O #100vezesMaxim nasceu sem briefing de cliente — nasceu de uma inquietação minha: será que eu consigo sustentar ideia boa todo santo dia, sem depender de inspiração de vez em quando? Decidi testar isso na prática, em público, com prazo curto e sem margem pra enrolar.",
     challenge_text:
@@ -37,6 +39,7 @@ export const seedProjects: Project[] = [
         project_id: "seed-100vezesmaxim",
         image_url: "/projects/100vezesmaxim/galeria-1.webp",
         alt_text: "Key visual da campanha #100vezesMaxim.",
+        position: "50% 50%",
         display_order: 1,
       },
       {
@@ -44,6 +47,7 @@ export const seedProjects: Project[] = [
         project_id: "seed-100vezesmaxim",
         image_url: "/projects/100vezesmaxim/galeria-2.webp",
         alt_text: "Peça da ativação com 100 influenciadores mostrando usos da Toalha Maxim.",
+        position: "50% 50%",
         display_order: 2,
       },
     ],
@@ -60,8 +64,10 @@ export const seedProjects: Project[] = [
     award: null,
     cover_image_url: "/projects/jobs-prefeitura-curitiba/capa.webp",
     cover_image_alt: "Peça de campanha da Prefeitura de Curitiba.",
+    cover_image_position: "50% 50%",
     hover_image_url: "/projects/jobs-prefeitura-curitiba/hover.webp",
     hover_image_alt: "Peça da campanha Aqui tem Zelo, da Prefeitura de Curitiba.",
+    hover_image_position: "50% 50%",
     context_text:
       "A Prefeitura de Curitiba abre vagas o ano inteiro — de operacional a cargo técnico — mas a comunicação dessas oportunidades vivia presa em edital, PDF e linguagem de concurso público. Quem precisava do emprego simplesmente não lia até o fim.",
     challenge_text:
@@ -78,6 +84,7 @@ export const seedProjects: Project[] = [
         project_id: "seed-jobs-prefeitura-curitiba",
         image_url: "/projects/jobs-prefeitura-curitiba/galeria-1.webp",
         alt_text: "Peça da campanha Aqui tem Zelo, da Prefeitura de Curitiba.",
+        position: "50% 50%",
         display_order: 1,
       },
       {
@@ -85,6 +92,7 @@ export const seedProjects: Project[] = [
         project_id: "seed-jobs-prefeitura-curitiba",
         image_url: "/projects/jobs-prefeitura-curitiba/galeria-2.webp",
         alt_text: "Peça do Programa Curitiba Mais Mulheres, com naming assinado pela Natália.",
+        position: "50% 50%",
         display_order: 2,
       },
     ],
@@ -101,8 +109,10 @@ export const seedProjects: Project[] = [
     award: null,
     cover_image_url: "/projects/detran-seguranca-no-transito/capa.webp",
     cover_image_alt: "Peça da campanha Semana Nacional de Trânsito do DETRAN.",
+    cover_image_position: "50% 50%",
     hover_image_url: "/projects/detran-seguranca-no-transito/hover.webp",
     hover_image_alt: "Peça da campanha Semana Nacional de Trânsito do DETRAN.",
+    hover_image_position: "50% 50%",
     context_text:
       "O DETRAN precisava de uma campanha de conscientização no trânsito que não fosse mais uma peça de estatística assustadora ignorada no feed — o público já tinha visto (e ignorado) esse tipo de comunicação centenas de vezes.",
     challenge_text:
@@ -118,6 +128,7 @@ export const seedProjects: Project[] = [
       project_id: "seed-detran-seguranca-no-transito",
       image_url: `/projects/detran-seguranca-no-transito/galeria-${i + 1}.webp`,
       alt_text: `Peça ${String(i + 1).padStart(2, "0")} da campanha Semana Nacional de Trânsito do DETRAN.`,
+      position: "50% 50%",
       display_order: i + 1,
     })),
     created_at: now,
@@ -133,8 +144,10 @@ export const seedProjects: Project[] = [
     award: null,
     cover_image_url: "/projects/insight-campanha-contra-racismo/capa.webp",
     cover_image_alt: "Peça da campanha para o Dia Nacional da Consciência Negra.",
+    cover_image_position: "50% 50%",
     hover_image_url: "/projects/insight-campanha-contra-racismo/hover.webp",
     hover_image_alt: "Peça da campanha para o Dia Nacional da Consciência Negra.",
+    hover_image_position: "50% 50%",
     context_text:
       "Marcas estavam (e ainda estão) publicando post de apoio antirracista todo mês de novembro e esquecendo do assunto no resto do ano. O briefing pedia uma campanha institucional que não caísse nesse lugar comum.",
     challenge_text:
@@ -150,6 +163,7 @@ export const seedProjects: Project[] = [
       project_id: "seed-insight-campanha-contra-racismo",
       image_url: `/projects/insight-campanha-contra-racismo/galeria-${i + 1}.webp`,
       alt_text: `Peça ${String(i + 1).padStart(2, "0")} da campanha para o Dia Nacional da Consciência Negra.`,
+      position: "50% 50%",
       display_order: i + 1,
     })),
     created_at: now,
@@ -165,8 +179,10 @@ export const seedProjects: Project[] = [
     award: null,
     cover_image_url: "/projects/campanha-black-friday/capa.webp",
     cover_image_alt: "Peça da campanha Black Friday da Oriba.",
+    cover_image_position: "50% 50%",
     hover_image_url: "/projects/campanha-black-friday/hover.webp",
     hover_image_alt: "Peça da campanha Transparent Friday da Oriba.",
+    hover_image_position: "50% 50%",
     context_text:
       "Cliente de varejo pedindo campanha de Black Friday — a data mais disputada do calendário publicitário, onde toda concorrente grita \"desconto\" ao mesmo tempo, no mesmo tom, com a mesma urgência artificial.",
     challenge_text:
@@ -182,6 +198,7 @@ export const seedProjects: Project[] = [
       project_id: "seed-campanha-black-friday",
       image_url: `/projects/campanha-black-friday/galeria-${i + 1}.webp`,
       alt_text: `Peça ${String(i + 1).padStart(2, "0")} da campanha Black Friday da Oriba.`,
+      position: "50% 50%",
       display_order: i + 1,
     })),
     created_at: now,
@@ -197,8 +214,10 @@ export const seedProjects: Project[] = [
     award: null,
     cover_image_url: "/projects/cartazes-outubro-rosa/capa.webp",
     cover_image_alt: "Cartaz da série Ditados que Salvam, de conscientização do Outubro Rosa.",
+    cover_image_position: "50% 50%",
     hover_image_url: "/projects/cartazes-outubro-rosa/hover.webp",
     hover_image_alt: "Cartaz da série Ditados que Salvam, de conscientização do Outubro Rosa.",
+    hover_image_position: "50% 50%",
     context_text:
       "Campanha interna de conscientização para o Outubro Rosa, pensada para circular em ambiente corporativo — mural, intranet, comunicação impressa — onde a mensagem de prevenção precisa competir com o volume normal de aviso de RH.",
     challenge_text:
@@ -214,6 +233,7 @@ export const seedProjects: Project[] = [
       project_id: "seed-cartazes-outubro-rosa",
       image_url: `/projects/cartazes-outubro-rosa/galeria-${i + 1}.webp`,
       alt_text: `Cartaz ${String(i + 1).padStart(2, "0")} da série Ditados que Salvam (Outubro Rosa).`,
+      position: "50% 50%",
       display_order: i + 1,
     })),
     created_at: now,
@@ -225,6 +245,7 @@ export const seedAbout: About = {
   id: "seed-about",
   photo_url: "/placeholders/natalia-sobre.svg",
   photo_alt: "Retrato ilustrativo de Natália Machado.",
+  photo_position: "50% 50%",
   bio_main_text:
     "Oi, eu sou a Natália Machado — redatora publicitária, mineira de nascimento e curitibana de adoção. Gosto de falar, mas sei ouvir — e é ouvir que me ajuda a escrever textos que resolvem problema de verdade, não só que enchem linha bonita.\n\nNão acho a zona de conforto confortável. Sou determinada demais para ficar parada esperando a oportunidade perfeita: fui atrás de agência, de prefeitura, de prêmio de mercado — e sigo atrás do próximo case que me tire do lugar.\n\nHoje assino campanhas para contas grandes, penso estratégia antes de escrever a primeira palavra e devolvo pro cliente aquilo que ele nem sabia que precisava ouvir.",
   bio_secondary_text:

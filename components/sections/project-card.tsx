@@ -37,6 +37,8 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
           hoverSrc={project.hover_image_url}
           alt={project.cover_image_alt}
           hoverAlt={project.hover_image_alt}
+          position={project.cover_image_position}
+          hoverPosition={project.hover_image_position}
           sizes="(min-width: 1024px) 60vw, 100vw"
           priority={priority}
         />

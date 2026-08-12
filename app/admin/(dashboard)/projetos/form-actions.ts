@@ -19,6 +19,7 @@ export interface ProjectFormState {
 export interface GalleryItemPayload {
   image_url: string;
   alt_text: string;
+  position: string;
 }
 
 function parseInput(formData: FormData) {
@@ -31,8 +32,10 @@ function parseInput(formData: FormData) {
     award: String(formData.get("award") ?? ""),
     cover_image_url: String(formData.get("cover_image_url") ?? ""),
     cover_image_alt: String(formData.get("cover_image_alt") ?? ""),
+    cover_image_position: String(formData.get("cover_image_position") ?? ""),
     hover_image_url: String(formData.get("hover_image_url") ?? ""),
     hover_image_alt: String(formData.get("hover_image_alt") ?? ""),
+    hover_image_position: String(formData.get("hover_image_position") ?? ""),
     context_text: String(formData.get("context_text") ?? ""),
     challenge_text: String(formData.get("challenge_text") ?? ""),
     solution_text: String(formData.get("solution_text") ?? ""),
@@ -77,8 +80,10 @@ export async function saveProjectAction(
     award: parsed.data.award || null,
     cover_image_url: parsed.data.cover_image_url,
     cover_image_alt: parsed.data.cover_image_alt,
+    cover_image_position: parsed.data.cover_image_position,
     hover_image_url: parsed.data.hover_image_url || null,
     hover_image_alt: parsed.data.hover_image_alt || null,
+    hover_image_position: parsed.data.hover_image_position,
     context_text: parsed.data.context_text,
     challenge_text: parsed.data.challenge_text,
     solution_text: parsed.data.solution_text,

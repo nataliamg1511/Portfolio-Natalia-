@@ -45,7 +45,7 @@ components/
 ├── layout/        # header, footer públicos
 ├── sections/       # hero, grid de projetos, vitrine de logos de clientes, card de projeto
 ├── motion/          # wrappers de framer-motion (fade-in, stagger, crossfade)
-├── admin/            # nav do admin, banner de fallback, lista editável
+├── admin/            # nav do admin, banner de fallback, lista editável, seletor de posição de imagem
 └── ui/                # shadcn/ui + marquee-along-svg-path, linkedin-icon
 lib/
 ├── types.ts
@@ -95,6 +95,9 @@ depender de nenhum backend configurado.
    - `supabase/migrations/0003_clientes.sql` (cria a tabela `clients` e já
      insere as 22 logos servidas de `public/clients/` — arquivo único, não
      precisa rodar nenhum seed separado para isso)
+   - `supabase/migrations/0004_posicao_imagens.sql` (colunas de enquadramento
+     `*_position` em `projects`, `project_gallery_images` e `about` — usadas
+     pelo seletor de posição de imagem em `/admin/projetos` e `/admin/sobre`)
 
    Alternativa via CLI (se tiver o Supabase CLI instalado):
    ```bash
@@ -137,3 +140,8 @@ depender de nenhum backend configurado.
   de usar `/admin/clientes` de verdade — sem a tabela `clients`, a vitrine
   "Pra quem já escrevi" na Home continua funcionando (cai no fallback local
   de `lib/data/seed.ts`, as mesmas 22 logos), mas o admin não salva nada.
+- Mesma coisa para `supabase/migrations/0004_posicao_imagens.sql`: sem ela,
+  a leitura do site público continua 100% normal (as colunas novas caem no
+  fallback `"50% 50%"` em `lib/data/*.ts`), mas salvar um projeto ou a
+  página `/sobre` no admin passa a falhar com erro de coluna inexistente —
+  rode a migration antes de usar o seletor de posição de imagem.

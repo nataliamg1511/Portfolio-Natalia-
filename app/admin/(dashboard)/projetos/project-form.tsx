@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ImagePositionPicker } from "@/components/admin/image-position-picker";
 import { slugify } from "@/lib/slug";
 import { uploadProjectImage } from "@/lib/supabase/upload";
 import { saveProjectAction, type ProjectFormState } from "@/app/admin/(dashboard)/projetos/form-actions";
@@ -25,6 +26,7 @@ interface ProjectFormProps {
 interface GalleryItem {
   image_url: string;
   alt_text: string;
+  position: string;
 }
 
 const initialState: ProjectFormState = { ok: false };
@@ -39,9 +41,15 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
   const [slugTouched, setSlugTouched] = useState(!!project);
   const [status, setStatus] = useState<"draft" | "published">(project?.status ?? "draft");
   const [coverUrl, setCoverUrl] = useState(project?.cover_image_url ?? "");
+  const [coverPosition, setCoverPosition] = useState(project?.cover_image_position ?? "50% 50%");
   const [hoverUrl, setHoverUrl] = useState(project?.hover_image_url ?? "");
+  const [hoverPosition, setHoverPosition] = useState(project?.hover_image_position ?? "50% 50%");
   const [gallery, setGallery] = useState<GalleryItem[]>(
-    project?.gallery?.map((g) => ({ image_url: g.image_url, alt_text: g.alt_text })) ?? []
+    project?.gallery?.map((g) => ({
+      image_url: g.image_url,
+      alt_text: g.alt_text,
+      position: g.position ?? "50% 50%",
+    })) ?? []
   );
   const [uploading, setUploading] = useState<string | null>(null);
 
@@ -81,7 +89,7 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
     setUploading("gallery");
     const url = await uploadProjectImage(file, "gallery");
     setUploading(null);
-    if (url) setGallery((g) => [...g, { image_url: url, alt_text: "" }]);
+    if (url) setGallery((g) => [...g, { image_url: url, alt_text: "", position: "50% 50%" }]);
     else toast.error("Não foi possível enviar a imagem. Conecte o Supabase (ver CLAUDE.md).");
   }
 
@@ -217,6 +225,18 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
               <Label htmlFor="cover_image_alt">Texto alternativo*</Label>
               <Input id="cover_image_alt" name="cover_image_alt" defaultValue={project?.cover_image_alt ?? ""} required />
             </div>
+            {coverUrl && (
+              <div className="space-y-2">
+                <Label>Enquadramento no card (4:3)</Label>
+                <ImagePositionPicker
+                  imageUrl={coverUrl}
+                  aspectRatio={4 / 3}
+                  value={coverPosition}
+                  onChange={setCoverPosition}
+                />
+              </div>
+            )}
+            <input type="hidden" name="cover_image_position" value={coverPosition} />
           </div>
 
           <div className="space-y-3">
@@ -237,6 +257,18 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
               <Label htmlFor="hover_image_alt">Texto alternativo</Label>
               <Input id="hover_image_alt" name="hover_image_alt" defaultValue={project?.hover_image_alt ?? ""} />
             </div>
+            {hoverUrl && (
+              <div className="space-y-2">
+                <Label>Enquadramento no card (4:3)</Label>
+                <ImagePositionPicker
+                  imageUrl={hoverUrl}
+                  aspectRatio={4 / 3}
+                  value={hoverPosition}
+                  onChange={setHoverPosition}
+                />
+              </div>
+            )}
+            <input type="hidden" name="hover_image_position" value={hoverPosition} />
           </div>
         </div>
       </section>
@@ -285,8 +317,18 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
         <div className="space-y-4">
           {gallery.map((item, index) => (
             <div key={index} className="flex items-start gap-4 rounded-lg border border-border p-4">
-              <div className="relative size-20 shrink-0 overflow-hidden rounded bg-secondary">
-                {item.image_url && <Image src={item.image_url} alt="" fill className="object-cover" />}
+              <div className="w-40 shrink-0 space-y-2">
+                {item.image_url && (
+                  <ImagePositionPicker
+                    imageUrl={item.image_url}
+                    aspectRatio={4 / 3}
+                    value={item.position}
+                    onChange={(value) =>
+                      setGallery((items) => items.map((it, i) => (i === index ? { ...it, position: value } : it)))
+                    }
+                    compact
+                  />
+                )}
               </div>
               <div className="flex-1 space-y-2">
                 <Label className="text-xs">Texto alternativo</Label>

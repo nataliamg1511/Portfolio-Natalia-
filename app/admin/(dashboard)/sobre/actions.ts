@@ -17,6 +17,7 @@ export async function saveAboutAction(
   const raw = {
     photo_url: String(formData.get("photo_url") ?? ""),
     photo_alt: String(formData.get("photo_alt") ?? ""),
+    photo_position: String(formData.get("photo_position") ?? ""),
     bio_main_text: String(formData.get("bio_main_text") ?? ""),
     bio_secondary_text: String(formData.get("bio_secondary_text") ?? ""),
     resume_url: String(formData.get("resume_url") ?? ""),
