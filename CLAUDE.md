@@ -86,6 +86,8 @@ depender de nenhum backend configurado.
    - `supabase/migrations/0001_initial.sql` (tabelas, índices, RLS, bucket
      `project-images` no Storage)
    - `supabase/seed.sql` (os 6 projetos reais + conteúdo de "Sobre")
+   - `supabase/migrations/0002_imagens_reais.sql` (troca os placeholders
+     pelas peças reais das campanhas, servidas de `public/projects/`)
 
    Alternativa via CLI (se tiver o Supabase CLI instalado):
    ```bash
