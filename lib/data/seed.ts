@@ -24,6 +24,8 @@ function caseSections(
     layout: "contained" as const,
     align: "center" as const,
     position: "50% 50%",
+    aspect: "" as const,
+    items: [],
     display_order: i + 1,
   }));
 }

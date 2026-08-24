@@ -10,13 +10,27 @@ export interface GalleryImage {
   display_order: number;
 }
 
-export type ProjectSectionKind = "text" | "video" | "link" | "image";
+export type ProjectSectionKind = "text" | "video" | "link" | "image" | "carousel";
 
 /** Largura do bloco na página do case. */
-export type SectionLayout = "contained" | "wide" | "half" | "full";
+export type SectionLayout = "small" | "contained" | "wide" | "half" | "full";
 
 /** Alinhamento horizontal do bloco quando ele é mais estreito que a página. */
 export type SectionAlign = "left" | "center" | "right";
+
+/** Orientação de vídeo ("" = legado, tratado como horizontal 16:9). */
+export type VideoAspect = "16:9" | "9:16" | "";
+
+/** Item de um bloco carrossel — imagem ou vídeo, exibidos lado a lado. */
+export interface CarouselItem {
+  type: "image" | "video";
+  /** URL da imagem, do arquivo de vídeo ou do embed YouTube/Vimeo. */
+  url: string;
+  /** Texto alternativo (imagens). */
+  alt: string;
+  /** Orientação do vídeo; ignorado em imagens (proporção natural). */
+  aspect: VideoAspect;
+}
 
 /**
  * Bloco de conteúdo de um case, na ordem definida no admin (arrastável).
@@ -40,6 +54,10 @@ export interface ProjectSection {
   align: SectionAlign;
   /** `object-position` CSS ("X% Y%") da imagem (kind "image"). */
   position: string;
+  /** Orientação do vídeo (kind "video"). */
+  aspect: VideoAspect;
+  /** Itens do carrossel (kind "carousel"). */
+  items: CarouselItem[];
   display_order: number;
 }
 

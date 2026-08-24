@@ -108,6 +108,9 @@ depender de nenhum backend configurado.
      `image` em `project_sections` + colunas de layout/alinhamento/
      enquadramento; copia a galeria como blocos de imagem intercalados e
      mantém `project_gallery_images` só como fallback de leitura)
+   - `supabase/migrations/0008_carrossel_e_orientacao.sql` (bloco `carousel`
+     com itens em jsonb, orientação de vídeo `aspect` 16:9/9:16 e o tamanho
+     `small` na caixa de largura dos blocos)
 
    Alternativa via CLI (se tiver o Supabase CLI instalado):
    ```bash
@@ -166,5 +169,9 @@ depender de nenhum backend configurado.
   admin falha — o insert usa as colunas novas (`image_alt`/`layout`/`align`/
   `position`) e o tipo `image`. Rode a 0007 junto do deploy do código que a
   acompanha.
+- Idem `supabase/migrations/0008_carrossel_e_orientacao.sql`: sem ela a
+  leitura pública segue normal (`aspect`/`items` caem em fallback), mas
+  salvar um projeto no admin falha — o insert usa `aspect`/`items` e os
+  tipos/tamanhos novos (`carousel`, `small`). Rode a 0008 junto do deploy.
 - O case "Aba CRM Unilever" entra como **rascunho** (sem conteúdo/artes) —
   a Natália preenche em `/admin/projetos` e publica quando tiver o material.

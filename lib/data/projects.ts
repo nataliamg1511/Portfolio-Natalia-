@@ -175,14 +175,16 @@ export async function updateProject(id: string, input: ProjectInput) {
 }
 
 export interface ProjectSectionInput {
-  kind: "text" | "video" | "link" | "image";
+  kind: "text" | "video" | "link" | "image" | "carousel";
   title: string;
   body: string;
   url: string;
   image_alt: string;
-  layout: "contained" | "wide" | "half" | "full";
+  layout: "small" | "contained" | "wide" | "half" | "full";
   align: "left" | "center" | "right";
   position: string;
+  aspect: "16:9" | "9:16" | "";
+  items: Array<{ type: "image" | "video"; url: string; alt: string; aspect: "16:9" | "9:16" | "" }>;
 }
 
 /** Substitui todas as seções de conteúdo de um case (mesmo padrão da galeria). */
@@ -216,6 +218,8 @@ export async function replaceProjectSections(projectId: string, sections: Projec
     layout: section.layout,
     align: section.align,
     position: section.position || "50% 50%",
+    aspect: section.aspect,
+    items: section.items,
     display_order: index + 1,
   }));
 
@@ -223,7 +227,7 @@ export async function replaceProjectSections(projectId: string, sections: Projec
   if (insertError) {
     return {
       ok: false as const,
-      error: `${insertError.message} — se faltarem colunas (image_alt/layout/align) ou o tipo "image" for rejeitado, rode supabase/migrations/0007_blocos_de_case.sql no SQL Editor.`,
+      error: `${insertError.message} — se faltarem colunas ou um tipo/tamanho for rejeitado, rode supabase/migrations/0007_blocos_de_case.sql e 0008_carrossel_e_orientacao.sql no SQL Editor.`,
     };
   }
   return { ok: true as const };
@@ -372,6 +376,8 @@ function withDerivedImageSections(project: Project): Project {
     layout: "wide",
     align: "center",
     position: image.position || "50% 50%",
+    aspect: "",
+    items: [],
     display_order: 0,
   });
 
@@ -405,11 +411,13 @@ function mapSections(row: any): ProjectSection[] {
         title: s.title ?? "",
         body: s.body ?? "",
         url: s.url ?? "",
-        // `??` cobre o período pré-migration 0007 (colunas ainda não existem).
+        // `??` cobre o período pré-migrations 0007/0008 (colunas ainda não existem).
         image_alt: s.image_alt ?? "",
         layout: s.layout ?? (s.kind === "text" ? "contained" : "wide"),
         align: s.align ?? "center",
         position: s.position ?? "50% 50%",
+        aspect: s.aspect ?? "",
+        items: Array.isArray(s.items) ? s.items : [],
         display_order: s.display_order,
       }))
       .sort((a: ProjectSection, b: ProjectSection) => a.display_order - b.display_order);
@@ -435,6 +443,8 @@ function mapSections(row: any): ProjectSection[] {
       layout: "contained" as const,
       align: "center" as const,
       position: "50% 50%",
+      aspect: "" as const,
+      items: [],
       display_order: index + 1,
     }));
 }

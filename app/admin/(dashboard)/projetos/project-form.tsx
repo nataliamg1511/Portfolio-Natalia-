@@ -6,6 +6,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import {
   AlertCircle,
+  GalleryHorizontal,
   GripVertical,
   ImagePlus,
   Link2,
@@ -46,12 +47,13 @@ import {
 } from "@/components/ui/select";
 import { ImagePositionPicker } from "@/components/admin/image-position-picker";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { VideoOrientationDialog } from "@/components/admin/video-orientation-dialog";
 import { cn } from "@/lib/utils";
 import { slugify } from "@/lib/slug";
 import { isVideoFileUrl } from "@/lib/video";
 import { uploadProjectImage, uploadProjectVideo, MAX_VIDEO_SIZE_MB } from "@/lib/supabase/upload";
 import { saveProjectAction, type ProjectFormState } from "@/app/admin/(dashboard)/projetos/form-actions";
-import type { Project, SectionAlign, SectionLayout } from "@/lib/types";
+import type { CarouselItem, Project, SectionAlign, SectionLayout, VideoAspect } from "@/lib/types";
 
 interface ProjectFormProps {
   project: Project | null;
@@ -61,7 +63,7 @@ interface ProjectFormProps {
 interface SectionItem {
   /** Id local (só pro drag-and-drop) — o servidor recria as linhas ao salvar. */
   id: string;
-  kind: "text" | "video" | "link" | "image";
+  kind: "text" | "video" | "link" | "image" | "carousel";
   title: string;
   body: string;
   url: string;
@@ -69,6 +71,8 @@ interface SectionItem {
   layout: SectionLayout;
   align: SectionAlign;
   position: string;
+  aspect: VideoAspect;
+  items: CarouselItem[];
 }
 
 const DEFAULT_SECTION_TITLES = ["Contexto do cliente", "O desafio", "A solução criativa", "O resultado"];
@@ -78,6 +82,7 @@ const KIND_LABEL: Record<SectionItem["kind"], string> = {
   video: "Vídeo",
   link: "Link",
   image: "Imagem",
+  carousel: "Carrossel",
 };
 
 let uidCounter = 0;
@@ -97,6 +102,8 @@ function newSection(kind: SectionItem["kind"], overrides: Partial<SectionItem> =
     layout: kind === "text" ? "contained" : "wide",
     align: "center",
     position: "50% 50%",
+    aspect: "",
+    items: [],
     ...overrides,
   };
 }
@@ -126,10 +133,13 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
         layout: s.layout,
         align: s.align,
         position: s.position,
+        aspect: s.aspect,
+        items: s.items,
       })
     ) ?? DEFAULT_SECTION_TITLES.map((title) => newSection("text", { title }))
   );
   const [uploading, setUploading] = useState<string | null>(null);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
 
   const coverInputRef = useRef<HTMLInputElement>(null);
   const hoverInputRef = useRef<HTMLInputElement>(null);
@@ -176,18 +186,6 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
     setUploading(null);
     if (url) setSections((items) => [...items, newSection("image", { url })]);
     else toast.error("Não foi possível enviar a imagem. Conecte o Supabase (ver CLAUDE.md).");
-  }
-
-  async function handleVideoUpload(sectionId: string, file: File) {
-    setUploading(sectionId);
-    const result = await uploadProjectVideo(file);
-    setUploading(null);
-    if ("url" in result) {
-      updateSectionById(sectionId, { url: result.url });
-      toast.success("Vídeo enviado.");
-    } else {
-      toast.error(result.error);
-    }
   }
 
   function moveSection(index: number, direction: "up" | "down") {
@@ -404,11 +402,9 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
                   section={section}
                   index={index}
                   total={sections.length}
-                  uploading={uploading === section.id}
                   onMove={moveSection}
                   onRemove={(id) => setSections((items) => items.filter((it) => it.id !== id))}
                   onUpdate={updateSectionById}
-                  onVideoUpload={handleVideoUpload}
                 />
               ))}
             </div>
@@ -435,13 +431,26 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
           >
             <ImagePlus className="size-4" /> {uploading === "image-block" ? "Enviando…" : "Imagem"}
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => setSections((items) => [...items, newSection("video")])}>
+          <Button type="button" variant="outline" size="sm" onClick={() => setVideoDialogOpen(true)}>
             <Video className="size-4" /> Vídeo
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setSections((items) => [...items, newSection("carousel")])}
+          >
+            <GalleryHorizontal className="size-4" /> Carrossel
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={() => setSections((items) => [...items, newSection("link")])}>
             <Link2 className="size-4" /> Link
           </Button>
         </div>
+        <VideoOrientationDialog
+          open={videoDialogOpen}
+          onOpenChange={setVideoDialogOpen}
+          onSelect={(aspect) => setSections((items) => [...items, newSection("video", { aspect })])}
+        />
         <input type="hidden" name="sections" value={JSON.stringify(sections)} />
       </section>
 
@@ -461,31 +470,89 @@ interface SortableSectionCardProps {
   section: SectionItem;
   index: number;
   total: number;
-  uploading: boolean;
   onMove: (index: number, direction: "up" | "down") => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, patch: Partial<SectionItem>) => void;
-  onVideoUpload: (id: string, file: File) => void;
 }
 
 function SortableSectionCard({
   section,
   index,
   total,
-  uploading,
   onMove,
   onRemove,
   onUpdate,
-  onVideoUpload,
 }: SortableSectionCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: section.id,
   });
   const videoFileInputRef = useRef<HTMLInputElement>(null);
+  const carouselImageInputRef = useRef<HTMLInputElement>(null);
+  const carouselVideoInputRef = useRef<HTMLInputElement>(null);
   // Modo do bloco de vídeo: URL de arquivo já enviado abre na aba "Arquivo".
   const [videoMode, setVideoMode] = useState<"link" | "file">(
     isVideoFileUrl(section.url) ? "file" : "link"
   );
+  const [busy, setBusy] = useState<string | null>(null);
+  // Popup de orientação pra ITEM do carrossel (o do bloco de vídeo fica no form).
+  const [itemVideoDialogOpen, setItemVideoDialogOpen] = useState(false);
+  // Índice do item de vídeo do carrossel que vai receber o arquivo enviado.
+  const [pendingVideoItemIndex, setPendingVideoItemIndex] = useState<number | null>(null);
+  const uploading = busy === "video";
+
+  async function handleVideoUpload(file: File) {
+    setBusy("video");
+    const result = await uploadProjectVideo(file);
+    setBusy(null);
+    if ("url" in result) {
+      onUpdate(section.id, { url: result.url });
+      toast.success("Vídeo enviado.");
+    } else {
+      toast.error(result.error);
+    }
+  }
+
+  function updateItem(itemIndex: number, patch: Partial<CarouselItem>) {
+    onUpdate(section.id, {
+      items: section.items.map((it, i) => (i === itemIndex ? { ...it, ...patch } : it)),
+    });
+  }
+
+  function moveItem(itemIndex: number, direction: "left" | "right") {
+    const target = direction === "left" ? itemIndex - 1 : itemIndex + 1;
+    if (target < 0 || target >= section.items.length) return;
+    const next = [...section.items];
+    [next[itemIndex], next[target]] = [next[target], next[itemIndex]];
+    onUpdate(section.id, { items: next });
+  }
+
+  async function handleCarouselImageUpload(file: File) {
+    setBusy("carousel-image");
+    const url = await uploadProjectImage(file, "gallery");
+    setBusy(null);
+    if (url) {
+      onUpdate(section.id, {
+        items: [...section.items, { type: "image", url, alt: "", aspect: "" }],
+      });
+    } else {
+      toast.error("Não foi possível enviar a imagem. Conecte o Supabase (ver CLAUDE.md).");
+    }
+  }
+
+  async function handleCarouselItemVideoUpload(file: File) {
+    const itemIndex = pendingVideoItemIndex;
+    setPendingVideoItemIndex(null);
+    if (itemIndex === null) return;
+    setBusy(`carousel-video-${itemIndex}`);
+    const result = await uploadProjectVideo(file);
+    setBusy(null);
+    if ("url" in result) {
+      updateItem(itemIndex, { url: result.url });
+      toast.success("Vídeo enviado.");
+    } else {
+      toast.error(result.error);
+    }
+  }
 
   return (
     <div
@@ -545,6 +612,7 @@ function SortableSectionCard({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="small">Pequena</SelectItem>
               <SelectItem value="contained">Normal (leitura)</SelectItem>
               <SelectItem value="wide">Larga</SelectItem>
               <SelectItem value="half">Metade</SelectItem>
@@ -641,6 +709,23 @@ function SortableSectionCard({
 
       {section.kind === "video" && (
         <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Orientação</Label>
+              <Select
+                value={section.aspect || "16:9"}
+                onValueChange={(aspect) => onUpdate(section.id, { aspect: aspect as VideoAspect })}
+              >
+                <SelectTrigger size="sm" className="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="16:9">Horizontal (16:9)</SelectItem>
+                  <SelectItem value="9:16">Vertical (9:16)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="inline-flex rounded-md border border-border p-0.5" role="tablist" aria-label="Origem do vídeo">
             <button
               type="button"
@@ -690,7 +775,7 @@ function SortableSectionCard({
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime"
                 className="hidden"
-                onChange={(e) => e.target.files?.[0] && onVideoUpload(section.id, e.target.files[0])}
+                onChange={(e) => e.target.files?.[0] && handleVideoUpload(e.target.files[0])}
               />
               <Button
                 type="button"
@@ -718,6 +803,170 @@ function SortableSectionCard({
             value={section.url}
             onChange={(e) => onUpdate(section.id, { url: e.target.value })}
             placeholder="https://…"
+          />
+        </div>
+      )}
+
+      {section.kind === "carousel" && (
+        <div className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Imagens e vídeos exibidos lado a lado, com deslize horizontal na página do case. A
+            ordem abaixo é a ordem no site.
+          </p>
+
+          {section.items.length > 0 && (
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {section.items.map((item, itemIndex) => (
+                <div
+                  key={itemIndex}
+                  className="w-48 shrink-0 space-y-2 rounded-lg border border-border bg-background p-2"
+                >
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                      {item.type === "video" ? (
+                        <>
+                          <Video className="size-3" aria-hidden /> {item.aspect || "16:9"}
+                        </>
+                      ) : (
+                        <>
+                          <ImagePlus className="size-3" aria-hidden /> Imagem
+                        </>
+                      )}
+                    </span>
+                    <span className="flex items-center">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => moveItem(itemIndex, "left")}
+                        disabled={itemIndex === 0}
+                        aria-label="Mover item para a esquerda"
+                      >
+                        ←
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => moveItem(itemIndex, "right")}
+                        disabled={itemIndex === section.items.length - 1}
+                        aria-label="Mover item para a direita"
+                      >
+                        →
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() =>
+                          onUpdate(section.id, {
+                            items: section.items.filter((_, i) => i !== itemIndex),
+                          })
+                        }
+                        aria-label="Remover item do carrossel"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </span>
+                  </div>
+
+                  {item.type === "image" ? (
+                    <>
+                      <div className="relative aspect-[4/3] w-full overflow-hidden rounded bg-secondary">
+                        {item.url && <Image src={item.url} alt="" fill sizes="192px" className="object-cover" />}
+                      </div>
+                      <Input
+                        value={item.alt}
+                        onChange={(e) => updateItem(itemIndex, { alt: e.target.value })}
+                        placeholder="Texto alternativo"
+                        className="h-8 text-xs"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        className={cn(
+                          "relative w-full overflow-hidden rounded bg-secondary",
+                          item.aspect === "9:16" ? "aspect-[9/16] max-h-40" : "aspect-video"
+                        )}
+                      >
+                        {isVideoFileUrl(item.url) ? (
+                          <video src={item.url} preload="metadata" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                            <Video className="size-5" aria-hidden />
+                          </div>
+                        )}
+                      </div>
+                      <Input
+                        type="url"
+                        value={isVideoFileUrl(item.url) ? "" : item.url}
+                        onChange={(e) => updateItem(itemIndex, { url: e.target.value })}
+                        placeholder="Link do YouTube/Vimeo"
+                        className="h-8 text-xs"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        disabled={busy === `carousel-video-${itemIndex}`}
+                        onClick={() => {
+                          setPendingVideoItemIndex(itemIndex);
+                          carouselVideoInputRef.current?.click();
+                        }}
+                      >
+                        <Upload className="size-3.5" />
+                        {busy === `carousel-video-${itemIndex}`
+                          ? "Enviando…"
+                          : isVideoFileUrl(item.url)
+                            ? "Trocar arquivo"
+                            : "Ou enviar arquivo"}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <input
+            ref={carouselImageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleCarouselImageUpload(e.target.files[0])}
+          />
+          <input
+            ref={carouselVideoInputRef}
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleCarouselItemVideoUpload(e.target.files[0])}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy === "carousel-image"}
+              onClick={() => carouselImageInputRef.current?.click()}
+            >
+              <ImagePlus className="size-4" />
+              {busy === "carousel-image" ? "Enviando…" : "Adicionar imagem"}
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setItemVideoDialogOpen(true)}>
+              <Video className="size-4" /> Adicionar vídeo
+            </Button>
+          </div>
+          <VideoOrientationDialog
+            open={itemVideoDialogOpen}
+            onOpenChange={setItemVideoDialogOpen}
+            onSelect={(aspect) =>
+              onUpdate(section.id, {
+                items: [...section.items, { type: "video", url: "", alt: "", aspect }],
+              })
+            }
           />
         </div>
       )}

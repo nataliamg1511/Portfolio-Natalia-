@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { Separator } from "@/components/ui/separator";
 import { FadeIn } from "@/components/motion/fade-in";
 import { ParallaxCover } from "@/components/motion/parallax-cover";
+import { CaseCarousel } from "@/components/sections/case-carousel";
 import { RichText } from "@/components/rich-text";
 import { cn } from "@/lib/utils";
 import { formatMeta, truncateForMeta } from "@/lib/format";
@@ -50,15 +51,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 function SectionContent({ section }: { section: ProjectSection }) {
   if (section.kind === "video") {
+    // Vídeo vertical (9:16) vive numa moldura estreita pra não dominar a
+    // página; horizontal ocupa a largura do bloco em 16:9.
+    const vertical = section.aspect === "9:16";
+    const frameWrap = vertical
+      ? cn("w-full max-w-sm", ALIGN_CLASS[section.align] ?? "mx-auto")
+      : "w-full";
+
     if (isVideoFileUrl(section.url)) {
       return (
-        <figure>
+        <figure className={frameWrap}>
           <video
             src={section.url}
             controls
             playsInline
             preload="metadata"
-            className="w-full bg-secondary"
+            className={cn("w-full bg-secondary", vertical && "aspect-[9/16] object-cover")}
           />
           {section.title && (
             <figcaption className="meta-text mt-3 normal-case tracking-normal">{section.title}</figcaption>
@@ -72,8 +80,13 @@ function SectionContent({ section }: { section: ProjectSection }) {
       return <SectionLink title={section.title || "Assistir ao vídeo"} url={section.url} />;
     }
     return (
-      <figure>
-        <div className="relative aspect-video w-full overflow-hidden bg-secondary">
+      <figure className={frameWrap}>
+        <div
+          className={cn(
+            "relative w-full overflow-hidden bg-secondary",
+            vertical ? "aspect-[9/16]" : "aspect-video"
+          )}
+        >
           <iframe
             src={embedUrl}
             title={section.title || "Vídeo do projeto"}
@@ -83,6 +96,17 @@ function SectionContent({ section }: { section: ProjectSection }) {
             loading="lazy"
           />
         </div>
+        {section.title && (
+          <figcaption className="meta-text mt-3 normal-case tracking-normal">{section.title}</figcaption>
+        )}
+      </figure>
+    );
+  }
+
+  if (section.kind === "carousel") {
+    return (
+      <figure>
+        <CaseCarousel items={section.items} label={section.title || undefined} />
         {section.title && (
           <figcaption className="meta-text mt-3 normal-case tracking-normal">{section.title}</figcaption>
         )}
@@ -142,6 +166,7 @@ function SectionContent({ section }: { section: ProjectSection }) {
 }
 
 const WIDTH_CLASS: Record<string, string> = {
+  small: "max-w-md",
   contained: "max-w-2xl",
   wide: "max-w-4xl",
   half: "max-w-xl",
@@ -176,7 +201,8 @@ function groupSections(sections: ProjectSection[]): RenderItem[] {
 }
 
 function SectionBlock({ section }: { section: ProjectSection }) {
-  const isMedia = section.kind === "image" || section.kind === "video";
+  const isMedia =
+    section.kind === "image" || section.kind === "video" || section.kind === "carousel";
 
   if (section.layout === "full" && isMedia) {
     return (
