@@ -5,13 +5,13 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { AlertCircle, ImagePlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EditableList } from "@/components/admin/editable-list";
 import { ImagePositionPicker } from "@/components/admin/image-position-picker";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { uploadProjectImage } from "@/lib/supabase/upload";
 import { saveAboutAction, type AboutFormState } from "@/app/admin/(dashboard)/sobre/actions";
 import type { About } from "@/lib/types";
@@ -22,6 +22,8 @@ export function AboutForm({ about, supabaseConfigured }: { about: About; supabas
   const [state, formAction, isPending] = useActionState(saveAboutAction, initialState);
   const [photoUrl, setPhotoUrl] = useState(about.photo_url);
   const [photoPosition, setPhotoPosition] = useState(about.photo_position ?? "50% 50%");
+  const [bioMain, setBioMain] = useState(about.bio_main_text);
+  const [bioSecondary, setBioSecondary] = useState(about.bio_secondary_text);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,14 +100,16 @@ export function AboutForm({ about, supabaseConfigured }: { about: About; supabas
 
       <section className="space-y-2">
         <Label htmlFor="bio_main_text">Quem é a Nat?*</Label>
-        <Textarea id="bio_main_text" name="bio_main_text" rows={8} defaultValue={about.bio_main_text} required />
+        <RichTextEditor id="bio_main_text" value={bioMain} onChange={setBioMain} minRows={8} />
+        <input type="hidden" name="bio_main_text" value={bioMain} />
         <FormattingHint />
         {state.fieldErrors?.bio_main_text && <FieldError message={state.fieldErrors.bio_main_text} />}
       </section>
 
       <section className="space-y-2">
         <Label htmlFor="bio_secondary_text">Um relacionamento*</Label>
-        <Textarea id="bio_secondary_text" name="bio_secondary_text" rows={8} defaultValue={about.bio_secondary_text} required />
+        <RichTextEditor id="bio_secondary_text" value={bioSecondary} onChange={setBioSecondary} minRows={8} />
+        <input type="hidden" name="bio_secondary_text" value={bioSecondary} />
         <FormattingHint />
         {state.fieldErrors?.bio_secondary_text && <FieldError message={state.fieldErrors.bio_secondary_text} />}
       </section>
@@ -151,8 +155,8 @@ export function AboutForm({ about, supabaseConfigured }: { about: About; supabas
 function FormattingHint() {
   return (
     <p className="text-xs text-muted-foreground">
-      Aceita formatação estilo markdown: **negrito**, *itálico*, listas começando com &quot;-&quot;,
-      subtítulos com &quot;## &quot; e parágrafos separados por linha em branco.
+      Use a barra acima ou atalhos enquanto digita: &quot;- &quot; ou &quot;* &quot; começa uma
+      lista, &quot;1. &quot; uma lista numerada, &quot;## &quot; um subtítulo e **texto** vira negrito.
     </p>
   );
 }

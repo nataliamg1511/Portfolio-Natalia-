@@ -6,13 +6,13 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { AlertCircle, ImagePlus, Link2, Plus, Trash2, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ImagePositionPicker } from "@/components/admin/image-position-picker";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { slugify } from "@/lib/slug";
 import { uploadProjectImage } from "@/lib/supabase/upload";
 import { saveProjectAction, type ProjectFormState } from "@/app/admin/(dashboard)/projetos/form-actions";
@@ -367,14 +367,14 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
               {section.kind === "text" ? (
                 <div className="space-y-2">
                   <Label className="text-xs">Texto</Label>
-                  <Textarea
-                    rows={4}
+                  <RichTextEditor
                     value={section.body}
-                    onChange={(e) => updateSection(index, { body: e.target.value })}
+                    onChange={(body) => updateSection(index, { body })}
+                    minRows={4}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Aceita formatação: **negrito**, *itálico*, listas começando com &quot;-&quot; e
-                    parágrafos separados por linha em branco.
+                    Use a barra acima ou atalhos: &quot;- &quot; ou &quot;* &quot; começa uma lista,
+                    &quot;1. &quot; lista numerada, **texto** vira negrito.
                   </p>
                 </div>
               ) : (
