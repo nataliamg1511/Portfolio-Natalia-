@@ -104,6 +104,10 @@ depender de nenhum backend configurado.
    - `supabase/migrations/0006_ajustes_projetos.sql` (nova ordem dos
      projetos, renomeações "Black Friday Oriba"/"Ditados que Salvam" e o case
      rascunho "Aba CRM Unilever")
+   - `supabase/migrations/0007_blocos_de_case.sql` (blocos de case: tipo
+     `image` em `project_sections` + colunas de layout/alinhamento/
+     enquadramento; copia a galeria como blocos de imagem intercalados e
+     mantém `project_gallery_images` só como fallback de leitura)
 
    Alternativa via CLI (se tiver o Supabase CLI instalado):
    ```bash
@@ -156,5 +160,11 @@ depender de nenhum backend configurado.
   antigas `context/challenge/solution/result_text`), mas salvar um projeto
   no admin falha porque a tabela `project_sections` não existe — rode a
   migration antes de editar projetos.
+- Idem `supabase/migrations/0007_blocos_de_case.sql`: sem ela o site público
+  continua normal (a leitura deriva blocos de imagem da galeria antiga em
+  memória, com os mesmos fallbacks de coluna), mas salvar um projeto no
+  admin falha — o insert usa as colunas novas (`image_alt`/`layout`/`align`/
+  `position`) e o tipo `image`. Rode a 0007 junto do deploy do código que a
+  acompanha.
 - O case "Aba CRM Unilever" entra como **rascunho** (sem conteúdo/artes) —
   a Natália preenche em `/admin/projetos` e publica quando tiver o material.

@@ -20,6 +20,10 @@ function caseSections(
     title,
     body,
     url: "",
+    image_alt: "",
+    layout: "contained" as const,
+    align: "center" as const,
+    position: "50% 50%",
     display_order: i + 1,
   }));
 }

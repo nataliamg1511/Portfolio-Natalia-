@@ -7,9 +7,11 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Separator } from "@/components/ui/separator";
 import { FadeIn } from "@/components/motion/fade-in";
+import { ParallaxCover } from "@/components/motion/parallax-cover";
 import { RichText } from "@/components/rich-text";
+import { cn } from "@/lib/utils";
 import { formatMeta, truncateForMeta } from "@/lib/format";
-import { getVideoEmbedUrl } from "@/lib/video";
+import { getVideoEmbedUrl, isVideoFileUrl } from "@/lib/video";
 import { getProjectBySlug, getPublishedProjects } from "@/lib/data/projects";
 import type { ProjectSection } from "@/lib/types";
 
@@ -48,6 +50,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 function SectionContent({ section }: { section: ProjectSection }) {
   if (section.kind === "video") {
+    if (isVideoFileUrl(section.url)) {
+      return (
+        <figure>
+          <video
+            src={section.url}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full bg-secondary"
+          />
+          {section.title && (
+            <figcaption className="meta-text mt-3 normal-case tracking-normal">{section.title}</figcaption>
+          )}
+        </figure>
+      );
+    }
+
     const embedUrl = getVideoEmbedUrl(section.url);
     if (!embedUrl) {
       return <SectionLink title={section.title || "Assistir ao vídeo"} url={section.url} />;
@@ -71,6 +90,42 @@ function SectionContent({ section }: { section: ProjectSection }) {
     );
   }
 
+  if (section.kind === "image") {
+    // Com enquadramento personalizado a imagem vive num crop 4:3 (o mesmo
+    // que o admin mostra ao arrastar); sem, respeita a proporção natural.
+    const cropped = section.position && section.position !== "50% 50%";
+    return (
+      <figure>
+        <div className="group overflow-hidden bg-secondary">
+          {cropped ? (
+            <div className="relative aspect-[4/3] w-full">
+              <Image
+                src={section.url}
+                alt={section.image_alt}
+                fill
+                sizes="(min-width: 1024px) 900px, 100vw"
+                className="object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.2,0,0,1)] group-hover:scale-[1.02]"
+                style={{ objectPosition: section.position }}
+              />
+            </div>
+          ) : (
+            <Image
+              src={section.url}
+              alt={section.image_alt}
+              width={1600}
+              height={1200}
+              sizes="(min-width: 1024px) 900px, 100vw"
+              className="h-auto w-full transition-transform duration-[600ms] ease-[cubic-bezier(0.2,0,0,1)] group-hover:scale-[1.02]"
+            />
+          )}
+        </div>
+        {section.title && (
+          <figcaption className="meta-text mt-3 normal-case tracking-normal">{section.title}</figcaption>
+        )}
+      </figure>
+    );
+  }
+
   if (section.kind === "link") {
     return <SectionLink title={section.title || section.url} url={section.url} />;
   }
@@ -83,6 +138,64 @@ function SectionContent({ section }: { section: ProjectSection }) {
         className="mt-3 space-y-4 text-[1.0625rem] leading-[1.65] text-foreground/90"
       />
     </>
+  );
+}
+
+const WIDTH_CLASS: Record<string, string> = {
+  contained: "max-w-2xl",
+  wide: "max-w-4xl",
+  half: "max-w-xl",
+};
+
+const ALIGN_CLASS: Record<string, string> = {
+  center: "mx-auto",
+  left: "mr-auto",
+  right: "ml-auto",
+};
+
+type RenderItem =
+  | { type: "single"; section: ProjectSection }
+  | { type: "pair"; sections: [ProjectSection, ProjectSection] };
+
+/** Dois blocos "metade" consecutivos formam uma dupla lado a lado. */
+function groupSections(sections: ProjectSection[]): RenderItem[] {
+  const items: RenderItem[] = [];
+  let i = 0;
+  while (i < sections.length) {
+    const current = sections[i];
+    const next = sections[i + 1];
+    if (current.layout === "half" && next?.layout === "half") {
+      items.push({ type: "pair", sections: [current, next] });
+      i += 2;
+    } else {
+      items.push({ type: "single", section: current });
+      i += 1;
+    }
+  }
+  return items;
+}
+
+function SectionBlock({ section }: { section: ProjectSection }) {
+  const isMedia = section.kind === "image" || section.kind === "video";
+
+  if (section.layout === "full" && isMedia) {
+    return (
+      <FadeIn y={20} margin="-5% 0px" className={section.kind === "image" ? "py-6" : "py-8"}>
+        <SectionContent section={section} />
+      </FadeIn>
+    );
+  }
+
+  return (
+    <FadeIn
+      y={isMedia ? 20 : 16}
+      margin={isMedia ? "-5% 0px" : "-10% 0px"}
+      className={cn("container-editorial", isMedia ? "py-6 md:py-8" : "py-10 md:py-14")}
+    >
+      <div className={cn(WIDTH_CLASS[section.layout] ?? "max-w-4xl", ALIGN_CLASS[section.align] ?? "mx-auto")}>
+        <SectionContent section={section} />
+      </div>
+    </FadeIn>
   );
 }
 
@@ -117,8 +230,7 @@ export default async function ProjectPage({ params }: PageProps) {
       ? allProjects[(currentIndex - 1 + allProjects.length) % allProjects.length]
       : null;
 
-  const sections = project.sections;
-  const gallery = project.gallery ?? [];
+  const items = groupSections(project.sections);
 
   return (
     <>
@@ -142,7 +254,7 @@ export default async function ProjectPage({ params }: PageProps) {
         </header>
 
         <FadeIn y={20} margin="-5% 0px">
-          <div className="relative mx-auto aspect-[16/10] w-full max-w-[1440px]">
+          <ParallaxCover className="relative mx-auto aspect-[16/10] w-full max-w-[1440px]">
             <Image
               src={project.cover_image_url}
               alt={project.cover_image_alt}
@@ -152,55 +264,41 @@ export default async function ProjectPage({ params }: PageProps) {
               className="object-cover"
               style={{ objectPosition: project.cover_image_position }}
             />
-          </div>
+          </ParallaxCover>
         </FadeIn>
 
-        <div className="container-editorial py-16 md:py-24">
-          {sections.map((section, index) => (
-            <div key={section.id}>
-              <FadeIn
-                className={
-                  section.kind === "video"
-                    ? "mx-auto max-w-4xl py-10 md:py-14"
-                    : "mx-auto max-w-2xl py-10 md:py-14"
-                }
-              >
-                <SectionContent section={section} />
-              </FadeIn>
-
-              {gallery[index] && (
-                <FadeIn y={20} margin="-5% 0px">
-                  <div className="relative mx-auto aspect-[4/3] w-full max-w-4xl">
-                    <Image
-                      src={gallery[index].image_url}
-                      alt={gallery[index].alt_text}
-                      fill
-                      sizes="(min-width: 1024px) 900px, 100vw"
-                      className="object-cover"
-                      style={{ objectPosition: gallery[index].position }}
-                    />
+        <div className="py-12 md:py-16">
+          {items.map((item, index) => {
+            if (item.type === "pair") {
+              const [a, b] = item.sections;
+              return (
+                <FadeIn key={a.id} y={20} margin="-5% 0px" className="container-editorial py-6 md:py-8">
+                  <div className="mx-auto grid max-w-4xl grid-cols-1 items-start gap-6 md:grid-cols-2">
+                    <SectionContent section={a} />
+                    <SectionContent section={b} />
                   </div>
                 </FadeIn>
-              )}
+              );
+            }
 
-              {index < sections.length - 1 && <Separator className="my-16" />}
-            </div>
-          ))}
+            const section = item.section;
+            const previous = index > 0 ? items[index - 1] : null;
+            const separatorBetweenTexts =
+              section.kind === "text" &&
+              previous?.type === "single" &&
+              previous.section.kind === "text";
 
-          {gallery.slice(sections.length).map((image) => (
-            <FadeIn key={image.id} className="mx-auto max-w-4xl py-6" y={20} margin="-5% 0px">
-              <div className="relative aspect-[4/3] w-full">
-                <Image
-                  src={image.image_url}
-                  alt={image.alt_text}
-                  fill
-                  sizes="(min-width: 1024px) 900px, 100vw"
-                  className="object-cover"
-                  style={{ objectPosition: image.position }}
-                />
+            return (
+              <div key={section.id}>
+                {separatorBetweenTexts && (
+                  <div className="container-editorial">
+                    <Separator className="mx-auto my-6 max-w-2xl" />
+                  </div>
+                )}
+                <SectionBlock section={section} />
               </div>
-            </FadeIn>
-          ))}
+            );
+          })}
         </div>
 
         {(nextProject || previousProject) && (

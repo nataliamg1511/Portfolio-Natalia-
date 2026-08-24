@@ -3,6 +3,20 @@
  * qualquer outra URL — nesse caso o case mostra um link normal em vez de
  * player incorporado.
  */
+/**
+ * URL aponta pra um arquivo de vídeo direto (upload no Storage ou link
+ * externo .mp4 etc.)? Nesse caso o case renderiza um <video> nativo em vez
+ * de iframe de YouTube/Vimeo.
+ */
+export function isVideoFileUrl(url: string): boolean {
+  try {
+    const pathname = url.startsWith("/") ? url : new URL(url).pathname;
+    return /\.(mp4|webm|mov|m4v|ogv)$/i.test(pathname);
+  } catch {
+    return false;
+  }
+}
+
 export function getVideoEmbedUrl(url: string): string | null {
   let parsed: URL;
   try {

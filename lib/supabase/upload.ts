@@ -29,3 +29,27 @@ export async function uploadProjectImage(file: File, folder: string): Promise<st
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }
+
+/** Teto do plano free do Supabase Storage (50 MB por arquivo). */
+export const MAX_VIDEO_SIZE_MB = 50;
+
+/**
+ * Envia um arquivo de vídeo (.mp4/.webm/.mov) para o mesmo bucket. Retorna
+ * a URL pública, ou `{ error }` com mensagem pronta pra mostrar no toast.
+ */
+export async function uploadProjectVideo(
+  file: File
+): Promise<{ url: string } | { error: string }> {
+  if (!file.type.startsWith("video/")) {
+    return { error: "Escolha um arquivo de vídeo (.mp4, .webm ou .mov)." };
+  }
+  if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
+    return {
+      error: `O vídeo tem ${(file.size / 1024 / 1024).toFixed(0)} MB — o limite é ${MAX_VIDEO_SIZE_MB} MB. Comprima o arquivo ou use um link do YouTube/Vimeo.`,
+    };
+  }
+
+  const url = await uploadProjectImage(file, "videos");
+  if (!url) return { error: "Não foi possível enviar o vídeo. Conecte o Supabase (ver CLAUDE.md)." };
+  return { url };
+}

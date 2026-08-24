@@ -44,7 +44,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 
   if (!supabase) {
     const found = seedProjects.find((p) => p.slug === slug && p.status === "published");
-    return found ?? null;
+    return found ? withDerivedImageSections(found) : null;
   }
 
   const { data, error } = await supabase
@@ -84,7 +84,8 @@ export async function getProjectByIdAdmin(id: string): Promise<Project | null> {
   const supabase = await createClient();
 
   if (!supabase) {
-    return seedProjects.find((p) => p.id === id) ?? null;
+    const found = seedProjects.find((p) => p.id === id);
+    return found ? withDerivedImageSections(found) : null;
   }
 
   const { data, error } = await supabase
@@ -174,10 +175,14 @@ export async function updateProject(id: string, input: ProjectInput) {
 }
 
 export interface ProjectSectionInput {
-  kind: "text" | "video" | "link";
+  kind: "text" | "video" | "link" | "image";
   title: string;
   body: string;
   url: string;
+  image_alt: string;
+  layout: "contained" | "wide" | "half" | "full";
+  align: "left" | "center" | "right";
+  position: string;
 }
 
 /** Substitui todas as seções de conteúdo de um case (mesmo padrão da galeria). */
@@ -207,11 +212,20 @@ export async function replaceProjectSections(projectId: string, sections: Projec
     title: section.title,
     body: section.body,
     url: section.url,
+    image_alt: section.image_alt,
+    layout: section.layout,
+    align: section.align,
+    position: section.position || "50% 50%",
     display_order: index + 1,
   }));
 
   const { error: insertError } = await supabase.from("project_sections").insert(rows);
-  if (insertError) return { ok: false as const, error: insertError.message };
+  if (insertError) {
+    return {
+      ok: false as const,
+      error: `${insertError.message} — se faltarem colunas (image_alt/layout/align) ou o tipo "image" for rejeitado, rode supabase/migrations/0007_blocos_de_case.sql no SQL Editor.`,
+    };
+  }
   return { ok: true as const };
 }
 
@@ -309,7 +323,7 @@ function mapProjectRow(row: any): Project {
     }))
     .sort((a: GalleryImage, b: GalleryImage) => a.display_order - b.display_order);
 
-  return {
+  return withDerivedImageSections({
     id: row.id,
     title: row.title,
     slug: row.slug,
@@ -329,6 +343,47 @@ function mapProjectRow(row: any): Project {
     gallery,
     created_at: row.created_at,
     updated_at: row.updated_at,
+  });
+}
+
+/**
+ * Compatibilidade com a era da "galeria intercalada" (pré-migration 0007 e
+ * seed local): se o case ainda não tem nenhum bloco de imagem mas tem galeria,
+ * converte as imagens em blocos `image` na mesma posição em que o site as
+ * renderizava — imagem N logo depois da seção N, excedentes no final. Com a
+ * 0007 rodada (ou depois do primeiro salvar no admin novo), as imagens já
+ * chegam como blocos e esta função não muda nada.
+ */
+function withDerivedImageSections(project: Project): Project {
+  const gallery = project.gallery ?? [];
+  if (gallery.length === 0 || project.sections.some((s) => s.kind === "image")) {
+    return project;
+  }
+
+  const merged: ProjectSection[] = [];
+  const toImageSection = (image: GalleryImage): ProjectSection => ({
+    id: `${image.id}-as-section`,
+    project_id: project.id,
+    kind: "image",
+    title: "",
+    body: "",
+    url: image.image_url,
+    image_alt: image.alt_text,
+    layout: "wide",
+    align: "center",
+    position: image.position || "50% 50%",
+    display_order: 0,
+  });
+
+  project.sections.forEach((section, index) => {
+    merged.push(section);
+    if (gallery[index]) merged.push(toImageSection(gallery[index]));
+  });
+  merged.push(...gallery.slice(project.sections.length).map(toImageSection));
+
+  return {
+    ...project,
+    sections: merged.map((section, index) => ({ ...section, display_order: index + 1 })),
   };
 }
 
@@ -350,6 +405,11 @@ function mapSections(row: any): ProjectSection[] {
         title: s.title ?? "",
         body: s.body ?? "",
         url: s.url ?? "",
+        // `??` cobre o período pré-migration 0007 (colunas ainda não existem).
+        image_alt: s.image_alt ?? "",
+        layout: s.layout ?? (s.kind === "text" ? "contained" : "wide"),
+        align: s.align ?? "center",
+        position: s.position ?? "50% 50%",
         display_order: s.display_order,
       }))
       .sort((a: ProjectSection, b: ProjectSection) => a.display_order - b.display_order);
@@ -371,6 +431,10 @@ function mapSections(row: any): ProjectSection[] {
       title,
       body: body as string,
       url: "",
+      image_alt: "",
+      layout: "contained" as const,
+      align: "center" as const,
+      position: "50% 50%",
       display_order: index + 1,
     }));
 }

@@ -10,24 +10,36 @@ export interface GalleryImage {
   display_order: number;
 }
 
-export type ProjectSectionKind = "text" | "video" | "link";
+export type ProjectSectionKind = "text" | "video" | "link" | "image";
+
+/** Largura do bloco na página do case. */
+export type SectionLayout = "contained" | "wide" | "half" | "full";
+
+/** Alinhamento horizontal do bloco quando ele é mais estreito que a página. */
+export type SectionAlign = "left" | "center" | "right";
 
 /**
- * Bloco de conteúdo de um case, na ordem definida no admin. Substitui os
- * quatro campos fixos (contexto/desafio/solução/resultado): agora cada seção
- * tem título editável e pode ser removida, e além de texto existem seções de
- * vídeo incorporado (YouTube/Vimeo) e de link.
+ * Bloco de conteúdo de um case, na ordem definida no admin (arrastável).
+ * Além de texto, vídeo (YouTube/Vimeo ou arquivo) e link, imagens também
+ * são blocos — o que permite posicionar cada peça exatamente onde ela deve
+ * aparecer e escolher largura/alinhamento por bloco.
  */
 export interface ProjectSection {
   id: string;
   project_id: string;
   kind: ProjectSectionKind;
-  /** Título da seção (texto), rótulo do link, ou legenda do vídeo. Opcional. */
+  /** Título da seção (texto), rótulo do link, ou legenda do vídeo/imagem. Opcional. */
   title: string;
   /** Corpo da seção de texto — aceita formatação estilo markdown. */
   body: string;
-  /** URL do vídeo (kind "video") ou do link (kind "link"). */
+  /** URL do vídeo (kind "video"), do link (kind "link") ou da imagem (kind "image"). */
   url: string;
+  /** Texto alternativo da imagem (kind "image"). */
+  image_alt: string;
+  layout: SectionLayout;
+  align: SectionAlign;
+  /** `object-position` CSS ("X% Y%") da imagem (kind "image"). */
+  position: string;
   display_order: number;
 }
 

@@ -35,15 +35,20 @@ export const projectSchema = z.object({
 export type ProjectFormValues = z.infer<typeof projectSchema>;
 
 /**
- * Seção de conteúdo do case — todas opcionais e com título editável.
- * Texto precisa de corpo; vídeo e link precisam de URL.
+ * Bloco de conteúdo do case — todos opcionais e com título editável.
+ * Texto precisa de corpo; vídeo, link e imagem precisam de URL.
+ * `layout` cai no padrão por tipo: texto na coluna de leitura, mídia larga.
  */
 export const projectSectionSchema = z
   .object({
-    kind: z.enum(["text", "video", "link"]),
+    kind: z.enum(["text", "video", "link", "image"]),
     title: z.string().trim().optional().default(""),
     body: z.string().trim().optional().default(""),
     url: z.string().trim().optional().default(""),
+    image_alt: z.string().trim().optional().default(""),
+    layout: z.enum(["contained", "wide", "half", "full"]).optional(),
+    align: z.enum(["left", "center", "right"]).optional().default("center"),
+    position: positionSchema.optional().default("50% 50%"),
   })
   .superRefine((section, ctx) => {
     if (section.kind === "text" && !section.body && !section.title) {
@@ -52,10 +57,17 @@ export const projectSectionSchema = z
     if ((section.kind === "video" || section.kind === "link") && !section.url) {
       ctx.addIssue({ code: "custom", message: "Informe a URL." });
     }
-    if (section.url && !/^https?:\/\//.test(section.url)) {
+    if (section.kind === "image" && !section.url) {
+      ctx.addIssue({ code: "custom", message: "Envie a imagem do bloco (ou remova o bloco)." });
+    }
+    if (section.url && !/^https?:\/\//.test(section.url) && !section.url.startsWith("/")) {
       ctx.addIssue({ code: "custom", message: "A URL precisa começar com http:// ou https://." });
     }
-  });
+  })
+  .transform((section) => ({
+    ...section,
+    layout: section.layout ?? (section.kind === "text" ? ("contained" as const) : ("wide" as const)),
+  }));
 
 export const projectSectionsSchema = z.array(projectSectionSchema);
 
