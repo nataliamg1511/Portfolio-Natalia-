@@ -29,14 +29,35 @@ export const projectSchema = z.object({
   hover_image_url: z.string().trim().optional().default(""),
   hover_image_alt: z.string().trim().optional().default(""),
   hover_image_position: positionSchema,
-  context_text: z.string().trim().min(1, "Conte o contexto do cliente."),
-  challenge_text: z.string().trim().min(1, "Conte o desafio."),
-  solution_text: z.string().trim().min(1, "Conte a solução criativa."),
-  result_text: z.string().trim().min(1, "Conte o resultado."),
   status: z.enum(["draft", "published"]),
 });
 
 export type ProjectFormValues = z.infer<typeof projectSchema>;
+
+/**
+ * Seção de conteúdo do case — todas opcionais e com título editável.
+ * Texto precisa de corpo; vídeo e link precisam de URL.
+ */
+export const projectSectionSchema = z
+  .object({
+    kind: z.enum(["text", "video", "link"]),
+    title: z.string().trim().optional().default(""),
+    body: z.string().trim().optional().default(""),
+    url: z.string().trim().optional().default(""),
+  })
+  .superRefine((section, ctx) => {
+    if (section.kind === "text" && !section.body && !section.title) {
+      ctx.addIssue({ code: "custom", message: "Escreva o texto da seção (ou remova a seção)." });
+    }
+    if ((section.kind === "video" || section.kind === "link") && !section.url) {
+      ctx.addIssue({ code: "custom", message: "Informe a URL." });
+    }
+    if (section.url && !/^https?:\/\//.test(section.url)) {
+      ctx.addIssue({ code: "custom", message: "A URL precisa começar com http:// ou https://." });
+    }
+  });
+
+export const projectSectionsSchema = z.array(projectSectionSchema);
 
 export const galleryImageSchema = z.object({
   image_url: z.string().trim().min(1),

@@ -4,20 +4,41 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { FadeIn } from "@/components/motion/fade-in";
 import { LinkedinIcon } from "@/components/ui/linkedin-icon";
+import { WhatsappIcon } from "@/components/ui/whatsapp-icon";
 import { getAbout } from "@/lib/data/about";
 
 export const metadata: Metadata = {
   title: "Contato",
-  description: "Fale com a Natália Machado pelo LinkedIn ou por e-mail.",
+  description: "Fale com a Natália Machado pelo WhatsApp, LinkedIn ou por e-mail.",
   alternates: { canonical: "/contato" },
 };
 
 export const revalidate = 60;
 
+/** "5541985324358" → "+55 41 98532-4358" (melhor de ler que o número corrido). */
+function formatWhatsappDisplay(digits: string) {
+  const br = digits.match(/^55(\d{2})(\d{4,5})(\d{4})$/);
+  if (br) return `+55 ${br[1]} ${br[2]}-${br[3]}`;
+  return `+${digits}`;
+}
+
 export default async function ContatoPage() {
   const { about } = await getAbout();
 
+  const whatsappDigits = about.whatsapp_number.replace(/\D/g, "");
+
   const channels = [
+    ...(whatsappDigits
+      ? [
+          {
+            label: "WhatsApp",
+            value: formatWhatsappDisplay(whatsappDigits),
+            href: `https://wa.me/${whatsappDigits}`,
+            icon: WhatsappIcon,
+            external: true,
+          },
+        ]
+      : []),
     {
       label: "LinkedIn",
       value: "Perfil profissional",
@@ -46,7 +67,7 @@ export default async function ContatoPage() {
           </FadeIn>
           <FadeIn delay={0.06}>
             <p className="mt-6 max-w-lg text-[1.25rem] leading-[1.6] text-muted-foreground">
-              Escreve pra mim pelo LinkedIn ou manda um e-mail — respondo assim que ler.
+              Me chama no WhatsApp, escreve pelo LinkedIn ou manda um e-mail — respondo assim que ler.
             </p>
           </FadeIn>
         </section>

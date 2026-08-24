@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
-import { AlertCircle, ImagePlus, Trash2 } from "lucide-react";
+import { AlertCircle, ImagePlus, Link2, Plus, Trash2, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,15 @@ interface GalleryItem {
   position: string;
 }
 
+interface SectionItem {
+  kind: "text" | "video" | "link";
+  title: string;
+  body: string;
+  url: string;
+}
+
+const DEFAULT_SECTION_TITLES = ["Contexto do cliente", "O desafio", "A solução criativa", "O resultado"];
+
 const initialState: ProjectFormState = { ok: false };
 
 export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
@@ -50,6 +59,14 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
       alt_text: g.alt_text,
       position: g.position ?? "50% 50%",
     })) ?? []
+  );
+  const [sections, setSections] = useState<SectionItem[]>(
+    project?.sections?.map((s) => ({
+      kind: s.kind,
+      title: s.title,
+      body: s.body,
+      url: s.url,
+    })) ?? DEFAULT_SECTION_TITLES.map((title) => ({ kind: "text" as const, title, body: "", url: "" }))
   );
   const [uploading, setUploading] = useState<string | null>(null);
 
@@ -101,6 +118,24 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
       [next[index], next[target]] = [next[target], next[index]];
       return next;
     });
+  }
+
+  function moveSection(index: number, direction: "up" | "down") {
+    setSections((items) => {
+      const target = direction === "up" ? index - 1 : index + 1;
+      if (target < 0 || target >= items.length) return items;
+      const next = [...items];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
+  function updateSection(index: number, patch: Partial<SectionItem>) {
+    setSections((items) => items.map((it, i) => (i === index ? { ...it, ...patch } : it)));
+  }
+
+  function addSection(kind: SectionItem["kind"]) {
+    setSections((items) => [...items, { kind, title: "", body: "", url: "" }]);
   }
 
   return (
@@ -279,30 +314,103 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
       <section className="space-y-5">
         <h2 className="text-base font-semibold text-foreground">Conteúdo do case</h2>
         <p className="text-sm text-muted-foreground">
-          Preencha os quatro campos — é isso que mostra pra quem avalia o portfólio que existe
-          estratégia por trás da peça.
+          Monte o case com as seções que fizerem sentido — nenhuma é obrigatória. Os títulos são
+          editáveis, dá pra reordenar e remover, e além de texto você pode incorporar vídeo
+          (YouTube/Vimeo) e adicionar links.
         </p>
 
-        <div className="space-y-2">
-          <Label htmlFor="context_text">Contexto do cliente*</Label>
-          <Textarea id="context_text" name="context_text" rows={3} defaultValue={project?.context_text ?? ""} required />
-          {state.fieldErrors?.context_text && <FieldError message={state.fieldErrors.context_text} />}
+        <div className="space-y-4">
+          {sections.map((section, index) => (
+            <div key={index} className="space-y-3 rounded-lg border border-border p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {section.kind === "video" && <Video className="size-3.5" aria-hidden />}
+                  {section.kind === "link" && <Link2 className="size-3.5" aria-hidden />}
+                  {section.kind === "text" ? "Texto" : section.kind === "video" ? "Vídeo incorporado" : "Link"}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Button type="button" variant="ghost" size="sm" onClick={() => moveSection(index, "up")} disabled={index === 0} aria-label="Mover seção para cima">
+                    ↑
+                  </Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => moveSection(index, "down")} disabled={index === sections.length - 1} aria-label="Mover seção para baixo">
+                    ↓
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setSections((items) => items.filter((_, i) => i !== index))}
+                    aria-label="Remover seção"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">
+                  {section.kind === "link" ? "Texto do link" : "Título da seção (opcional)"}
+                </Label>
+                <Input
+                  value={section.title}
+                  onChange={(e) => updateSection(index, { title: e.target.value })}
+                  placeholder={
+                    section.kind === "text"
+                      ? "Ex.: Contexto do cliente"
+                      : section.kind === "video"
+                        ? "Legenda do vídeo (opcional)"
+                        : "Ex.: Ver campanha no ar"
+                  }
+                />
+              </div>
+
+              {section.kind === "text" ? (
+                <div className="space-y-2">
+                  <Label className="text-xs">Texto</Label>
+                  <Textarea
+                    rows={4}
+                    value={section.body}
+                    onChange={(e) => updateSection(index, { body: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Aceita formatação: **negrito**, *itálico*, listas começando com &quot;-&quot; e
+                    parágrafos separados por linha em branco.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-xs">URL</Label>
+                  <Input
+                    type="url"
+                    value={section.url}
+                    onChange={(e) => updateSection(index, { url: e.target.value })}
+                    placeholder={
+                      section.kind === "video" ? "https://www.youtube.com/watch?v=…" : "https://…"
+                    }
+                  />
+                  {section.kind === "video" && (
+                    <p className="text-xs text-muted-foreground">
+                      Cole o link do YouTube ou Vimeo — o vídeo aparece incorporado na página do case.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="challenge_text">O desafio*</Label>
-          <Textarea id="challenge_text" name="challenge_text" rows={3} defaultValue={project?.challenge_text ?? ""} required />
-          {state.fieldErrors?.challenge_text && <FieldError message={state.fieldErrors.challenge_text} />}
+
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => addSection("text")}>
+            <Plus className="size-4" /> Seção de texto
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => addSection("video")}>
+            <Video className="size-4" /> Vídeo
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => addSection("link")}>
+            <Link2 className="size-4" /> Link
+          </Button>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="solution_text">A solução criativa*</Label>
-          <Textarea id="solution_text" name="solution_text" rows={3} defaultValue={project?.solution_text ?? ""} required />
-          {state.fieldErrors?.solution_text && <FieldError message={state.fieldErrors.solution_text} />}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="result_text">O resultado*</Label>
-          <Textarea id="result_text" name="result_text" rows={3} defaultValue={project?.result_text ?? ""} required />
-          {state.fieldErrors?.result_text && <FieldError message={state.fieldErrors.result_text} />}
-        </div>
+        <input type="hidden" name="sections" value={JSON.stringify(sections)} />
       </section>
 
       <Separator />

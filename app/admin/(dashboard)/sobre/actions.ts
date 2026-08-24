@@ -26,7 +26,9 @@ export async function saveAboutAction(
     whatsapp_number: String(formData.get("whatsapp_number") ?? ""),
   };
 
-  const clients = String(formData.get("clients") ?? "[]");
+  // O campo de tags "clients" saiu do formulário (a vitrine de logos é
+  // gerenciada em /admin/clientes) — preservamos o valor já salvo no banco.
+  const clientsRaw = formData.get("clients");
   const tools = String(formData.get("tools") ?? "[]");
 
   const parsed = aboutSchema.safeParse(raw);
@@ -43,7 +45,7 @@ export async function saveAboutAction(
 
   const result = await updateAbout(about.id, {
     ...parsed.data,
-    clients: JSON.parse(clients),
+    clients: clientsRaw === null ? about.clients : JSON.parse(String(clientsRaw)),
     tools: JSON.parse(tools),
   });
 

@@ -2,12 +2,16 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Trophy } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Separator } from "@/components/ui/separator";
 import { FadeIn } from "@/components/motion/fade-in";
+import { RichText } from "@/components/rich-text";
 import { formatMeta, truncateForMeta } from "@/lib/format";
+import { getVideoEmbedUrl } from "@/lib/video";
 import { getProjectBySlug, getPublishedProjects } from "@/lib/data/projects";
+import type { ProjectSection } from "@/lib/types";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -25,7 +29,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const project = await getProjectBySlug(slug);
   if (!project) return {};
 
-  const description = truncateForMeta(project.context_text);
+  const firstText = project.sections.find((s) => s.kind === "text" && s.body);
+  const description = firstText
+    ? truncateForMeta(firstText.body)
+    : `${project.title} — case de ${project.category.toLowerCase()} no portfólio de Natália Machado.`;
 
   return {
     title: project.title,
@@ -39,15 +46,61 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-const CONTENT_BLOCKS = (project: Awaited<ReturnType<typeof getProjectBySlug>>) =>
-  project
-    ? [
-        { label: "Contexto do cliente", text: project.context_text },
-        { label: "O desafio", text: project.challenge_text },
-        { label: "A solução criativa", text: project.solution_text },
-        { label: "O resultado", text: project.result_text },
-      ]
-    : [];
+function SectionContent({ section }: { section: ProjectSection }) {
+  if (section.kind === "video") {
+    const embedUrl = getVideoEmbedUrl(section.url);
+    if (!embedUrl) {
+      return <SectionLink title={section.title || "Assistir ao vídeo"} url={section.url} />;
+    }
+    return (
+      <figure>
+        <div className="relative aspect-video w-full overflow-hidden bg-secondary">
+          <iframe
+            src={embedUrl}
+            title={section.title || "Vídeo do projeto"}
+            className="absolute inset-0 h-full w-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            loading="lazy"
+          />
+        </div>
+        {section.title && (
+          <figcaption className="meta-text mt-3 normal-case tracking-normal">{section.title}</figcaption>
+        )}
+      </figure>
+    );
+  }
+
+  if (section.kind === "link") {
+    return <SectionLink title={section.title || section.url} url={section.url} />;
+  }
+
+  return (
+    <>
+      {section.title && <h2 className="text-lg font-semibold text-foreground">{section.title}</h2>}
+      <RichText
+        text={section.body}
+        className="mt-3 space-y-4 text-[1.0625rem] leading-[1.65] text-foreground/90"
+      />
+    </>
+  );
+}
+
+function SectionLink({ title, url }: { title: string; url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="link-underline inline-flex items-center gap-1.5 text-base font-medium text-foreground"
+    >
+      <span>{title}</span>
+      <span className="arrow-trailing" aria-hidden>
+        →
+      </span>
+    </a>
+  );
+}
 
 export default async function ProjectPage({ params }: PageProps) {
   const { slug } = await params;
@@ -64,7 +117,7 @@ export default async function ProjectPage({ params }: PageProps) {
       ? allProjects[(currentIndex - 1 + allProjects.length) % allProjects.length]
       : null;
 
-  const blocks = CONTENT_BLOCKS(project);
+  const sections = project.sections;
   const gallery = project.gallery ?? [];
 
   return (
@@ -80,8 +133,9 @@ export default async function ProjectPage({ params }: PageProps) {
               {project.title}
             </h1>
             {project.award && (
-              <div className="mt-6 inline-block border border-accent px-3 py-1.5">
-                <span className="meta-text text-accent">{project.award}</span>
+              <div className="mt-6 inline-flex items-center gap-2 border border-accent px-3 py-1.5">
+                <Trophy className="size-4 text-accent" strokeWidth={1.75} aria-hidden />
+                <span className="meta-text text-accent">Vencedor do prêmio {project.award}</span>
               </div>
             )}
           </FadeIn>
@@ -102,13 +156,16 @@ export default async function ProjectPage({ params }: PageProps) {
         </FadeIn>
 
         <div className="container-editorial py-16 md:py-24">
-          {blocks.map((block, index) => (
-            <div key={block.label}>
-              <FadeIn className="mx-auto max-w-2xl py-10 md:py-14">
-                <h2 className="text-lg font-semibold text-foreground">{block.label}</h2>
-                <p className="mt-3 text-[1.0625rem] leading-[1.65] text-foreground/90">
-                  {block.text}
-                </p>
+          {sections.map((section, index) => (
+            <div key={section.id}>
+              <FadeIn
+                className={
+                  section.kind === "video"
+                    ? "mx-auto max-w-4xl py-10 md:py-14"
+                    : "mx-auto max-w-2xl py-10 md:py-14"
+                }
+              >
+                <SectionContent section={section} />
               </FadeIn>
 
               {gallery[index] && (
@@ -126,11 +183,11 @@ export default async function ProjectPage({ params }: PageProps) {
                 </FadeIn>
               )}
 
-              {index < blocks.length - 1 && <Separator className="my-16" />}
+              {index < sections.length - 1 && <Separator className="my-16" />}
             </div>
           ))}
 
-          {gallery.slice(blocks.length).map((image) => (
+          {gallery.slice(sections.length).map((image) => (
             <FadeIn key={image.id} className="mx-auto max-w-4xl py-6" y={20} margin="-5% 0px">
               <div className="relative aspect-[4/3] w-full">
                 <Image

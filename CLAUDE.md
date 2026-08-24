@@ -98,6 +98,12 @@ depender de nenhum backend configurado.
    - `supabase/migrations/0004_posicao_imagens.sql` (colunas de enquadramento
      `*_position` em `projects`, `project_gallery_images` e `about` — usadas
      pelo seletor de posição de imagem em `/admin/projetos` e `/admin/sobre`)
+   - `supabase/migrations/0005_secoes_de_case.sql` (tabela `project_sections`
+     — seções flexíveis do case com título editável, texto/vídeo/link; copia
+     os quatro textos antigos como seções e esvazia as colunas legadas)
+   - `supabase/migrations/0006_ajustes_projetos.sql` (nova ordem dos
+     projetos, renomeações "Black Friday Oriba"/"Ditados que Salvam" e o case
+     rascunho "Aba CRM Unilever")
 
    Alternativa via CLI (se tiver o Supabase CLI instalado):
    ```bash
@@ -145,3 +151,10 @@ depender de nenhum backend configurado.
   fallback `"50% 50%"` em `lib/data/*.ts`), mas salvar um projeto ou a
   página `/sobre` no admin passa a falhar com erro de coluna inexistente —
   rode a migration antes de usar o seletor de posição de imagem.
+- E para `supabase/migrations/0005_secoes_de_case.sql`: sem ela, o site
+  público continua no ar (as seções do case são derivadas das colunas
+  antigas `context/challenge/solution/result_text`), mas salvar um projeto
+  no admin falha porque a tabela `project_sections` não existe — rode a
+  migration antes de editar projetos.
+- O case "Aba CRM Unilever" entra como **rascunho** (sem conteúdo/artes) —
+  a Natália preenche em `/admin/projetos` e publica quando tiver o material.

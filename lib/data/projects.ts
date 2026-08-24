@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { seedProjects } from "@/lib/data/seed";
-import type { GalleryImage, Project, ProjectStatus } from "@/lib/types";
+import type { GalleryImage, Project, ProjectSection, ProjectStatus } from "@/lib/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 function sortByOrder<T extends { display_order: number }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.display_order - b.display_order);
@@ -54,6 +55,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     .maybeSingle();
 
   if (error || !data) return null;
+  await attachSections(supabase, data);
   return mapProjectRow(data);
 }
 
@@ -92,7 +94,25 @@ export async function getProjectByIdAdmin(id: string): Promise<Project | null> {
     .maybeSingle();
 
   if (error || !data) return null;
+  await attachSections(supabase, data);
   return mapProjectRow(data);
+}
+
+/**
+ * Busca as seções do case numa query separada (não no `select` principal):
+ * se a migration 0005 ainda não rodou, a tabela não existe e o erro é
+ * ignorado — mapProjectRow deriva as seções das colunas antigas
+ * (context/challenge/solution/result) e o site continua no ar.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function attachSections(supabase: SupabaseClient, row: any) {
+  const { data, error } = await supabase
+    .from("project_sections")
+    .select("*")
+    .eq("project_id", row.id)
+    .order("display_order", { ascending: true });
+
+  if (!error && data) row.project_sections = data;
 }
 
 export interface ProjectInput {
@@ -108,10 +128,6 @@ export interface ProjectInput {
   hover_image_url: string | null;
   hover_image_alt: string | null;
   hover_image_position: string;
-  context_text: string;
-  challenge_text: string;
-  solution_text: string;
-  result_text: string;
   status: ProjectStatus;
 }
 
@@ -155,6 +171,48 @@ export async function updateProject(id: string, input: ProjectInput) {
 
   if (error) return { ok: false as const, error: error.message };
   return { ok: true as const, project: mapProjectRow(data) };
+}
+
+export interface ProjectSectionInput {
+  kind: "text" | "video" | "link";
+  title: string;
+  body: string;
+  url: string;
+}
+
+/** Substitui todas as seções de conteúdo de um case (mesmo padrão da galeria). */
+export async function replaceProjectSections(projectId: string, sections: ProjectSectionInput[]) {
+  const supabase = await createClient();
+  if (!supabase) {
+    return { ok: false as const, error: "Conecte o Supabase para gerenciar o conteúdo de verdade." };
+  }
+
+  const { error: deleteError } = await supabase
+    .from("project_sections")
+    .delete()
+    .eq("project_id", projectId);
+
+  if (deleteError) {
+    return {
+      ok: false as const,
+      error: `${deleteError.message} — se a tabela project_sections não existe, rode supabase/migrations/0005_secoes_de_case.sql no SQL Editor.`,
+    };
+  }
+
+  if (sections.length === 0) return { ok: true as const };
+
+  const rows = sections.map((section, index) => ({
+    project_id: projectId,
+    kind: section.kind,
+    title: section.title,
+    body: section.body,
+    url: section.url,
+    display_order: index + 1,
+  }));
+
+  const { error: insertError } = await supabase.from("project_sections").insert(rows);
+  if (insertError) return { ok: false as const, error: insertError.message };
+  return { ok: true as const };
 }
 
 export interface GalleryImageInput {
@@ -265,14 +323,54 @@ function mapProjectRow(row: any): Project {
     hover_image_url: row.hover_image_url,
     hover_image_alt: row.hover_image_alt,
     hover_image_position: row.hover_image_position ?? "50% 50%",
-    context_text: row.context_text,
-    challenge_text: row.challenge_text,
-    solution_text: row.solution_text,
-    result_text: row.result_text,
+    sections: mapSections(row),
     status: row.status,
     display_order: row.display_order,
     gallery,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
+}
+
+/**
+ * Seções do case: usa as linhas de `project_sections` quando vieram na row
+ * (attachSections). Sem elas — migration 0005 não rodou, ou é uma listagem
+ * que não precisa do conteúdo — deriva das colunas antigas
+ * context/challenge/solution/result com os títulos clássicos, pulando as
+ * vazias (a 0005 esvazia essas colunas ao migrar, então não há duplicação).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapSections(row: any): ProjectSection[] {
+  if (Array.isArray(row.project_sections)) {
+    return row.project_sections
+      .map((s: ProjectSection) => ({
+        id: s.id,
+        project_id: s.project_id,
+        kind: s.kind ?? "text",
+        title: s.title ?? "",
+        body: s.body ?? "",
+        url: s.url ?? "",
+        display_order: s.display_order,
+      }))
+      .sort((a: ProjectSection, b: ProjectSection) => a.display_order - b.display_order);
+  }
+
+  const legacy: Array<[title: string, body: string | null | undefined]> = [
+    ["Contexto do cliente", row.context_text],
+    ["O desafio", row.challenge_text],
+    ["A solução criativa", row.solution_text],
+    ["O resultado", row.result_text],
+  ];
+
+  return legacy
+    .filter(([, body]) => typeof body === "string" && body.trim().length > 0)
+    .map(([title, body], index) => ({
+      id: `${row.id}-legacy-${index + 1}`,
+      project_id: row.id,
+      kind: "text" as const,
+      title,
+      body: body as string,
+      url: "",
+      display_order: index + 1,
+    }));
 }

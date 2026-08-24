@@ -1,12 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { projectSchema } from "@/lib/validation/project";
+import { projectSchema, projectSectionsSchema } from "@/lib/validation/project";
 import {
   createProject,
   replaceProjectGallery,
+  replaceProjectSections,
   updateProject,
   type ProjectInput,
+  type ProjectSectionInput,
 } from "@/lib/data/projects";
 
 export interface ProjectFormState {
@@ -36,10 +38,6 @@ function parseInput(formData: FormData) {
     hover_image_url: String(formData.get("hover_image_url") ?? ""),
     hover_image_alt: String(formData.get("hover_image_alt") ?? ""),
     hover_image_position: String(formData.get("hover_image_position") ?? ""),
-    context_text: String(formData.get("context_text") ?? ""),
-    challenge_text: String(formData.get("challenge_text") ?? ""),
-    solution_text: String(formData.get("solution_text") ?? ""),
-    result_text: String(formData.get("result_text") ?? ""),
     status: String(formData.get("status") ?? "draft"),
   };
 
@@ -51,7 +49,15 @@ function parseInput(formData: FormData) {
     gallery = [];
   }
 
-  return { raw, gallery };
+  const sectionsRaw = String(formData.get("sections") ?? "[]");
+  let sections: unknown = [];
+  try {
+    sections = JSON.parse(sectionsRaw);
+  } catch {
+    sections = [];
+  }
+
+  return { raw, gallery, sections };
 }
 
 export async function saveProjectAction(
@@ -59,7 +65,7 @@ export async function saveProjectAction(
   _prevState: ProjectFormState,
   formData: FormData
 ): Promise<ProjectFormState> {
-  const { raw, gallery } = parseInput(formData);
+  const { raw, gallery, sections } = parseInput(formData);
 
   const parsed = projectSchema.safeParse(raw);
   if (!parsed.success) {
@@ -69,6 +75,18 @@ export async function saveProjectAction(
       if (typeof key === "string" && !fieldErrors[key]) fieldErrors[key] = issue.message;
     }
     return { ok: false, error: "Confira os campos destacados.", fieldErrors };
+  }
+
+  const parsedSections = projectSectionsSchema.safeParse(sections);
+  if (!parsedSections.success) {
+    const issue = parsedSections.error.issues[0];
+    const index = typeof issue?.path[0] === "number" ? issue.path[0] + 1 : null;
+    return {
+      ok: false,
+      error: index
+        ? `Seção ${index} do conteúdo: ${issue.message}`
+        : "Confira as seções de conteúdo do case.",
+    };
   }
 
   const input: ProjectInput = {
@@ -84,10 +102,6 @@ export async function saveProjectAction(
     hover_image_url: parsed.data.hover_image_url || null,
     hover_image_alt: parsed.data.hover_image_alt || null,
     hover_image_position: parsed.data.hover_image_position,
-    context_text: parsed.data.context_text,
-    challenge_text: parsed.data.challenge_text,
-    solution_text: parsed.data.solution_text,
-    result_text: parsed.data.result_text,
     status: parsed.data.status,
   };
 
@@ -98,6 +112,15 @@ export async function saveProjectAction(
   }
 
   const finalId = "project" in result ? result.project.id : projectId!;
+
+  const sectionsResult = await replaceProjectSections(
+    finalId,
+    parsedSections.data as ProjectSectionInput[]
+  );
+
+  if (!sectionsResult.ok) {
+    return { ok: false, error: sectionsResult.error, projectId: finalId };
+  }
 
   const galleryResult = await replaceProjectGallery(
     finalId,

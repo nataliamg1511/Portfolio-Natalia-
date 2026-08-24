@@ -99,20 +99,24 @@ export function AboutForm({ about, supabaseConfigured }: { about: About; supabas
       <section className="space-y-2">
         <Label htmlFor="bio_main_text">Quem é a Nat?*</Label>
         <Textarea id="bio_main_text" name="bio_main_text" rows={8} defaultValue={about.bio_main_text} required />
-        <p className="text-xs text-muted-foreground">Separe parágrafos com uma linha em branco.</p>
+        <FormattingHint />
         {state.fieldErrors?.bio_main_text && <FieldError message={state.fieldErrors.bio_main_text} />}
       </section>
 
       <section className="space-y-2">
         <Label htmlFor="bio_secondary_text">Um relacionamento*</Label>
         <Textarea id="bio_secondary_text" name="bio_secondary_text" rows={8} defaultValue={about.bio_secondary_text} required />
+        <FormattingHint />
         {state.fieldErrors?.bio_secondary_text && <FieldError message={state.fieldErrors.bio_secondary_text} />}
       </section>
 
       <Separator />
 
-      <EditableList name="clients" label="Clientes/marcas atendidas" initialItems={about.clients} placeholder="Nome do cliente" />
       <EditableList name="tools" label="Ferramentas/IAs" initialItems={about.tools} placeholder="Nome da ferramenta" />
+      <p className="text-xs text-muted-foreground">
+        As logos da vitrine &quot;Pra quem já escrevi&quot; (Home e página Sobre) são gerenciadas em{" "}
+        <a href="/admin/clientes" className="underline underline-offset-2">Clientes</a>.
+      </p>
 
       <Separator />
 
@@ -141,6 +145,15 @@ export function AboutForm({ about, supabaseConfigured }: { about: About; supabas
         {isPending ? "Salvando…" : "Salvar alterações"}
       </Button>
     </form>
+  );
+}
+
+function FormattingHint() {
+  return (
+    <p className="text-xs text-muted-foreground">
+      Aceita formatação estilo markdown: **negrito**, *itálico*, listas começando com &quot;-&quot;,
+      subtítulos com &quot;## &quot; e parágrafos separados por linha em branco.
+    </p>
   );
 }
 

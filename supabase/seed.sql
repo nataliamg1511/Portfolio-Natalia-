@@ -52,6 +52,23 @@ insert into public.projects (
   'published', 2
 ),
 (
+  'Aba CRM Unilever', 'aba-crm-unilever', 'CRM', 2023, 'Unilever', null,
+  '/placeholders/aba-crm-unilever-capa.svg', 'Capa provisória do case Aba CRM Unilever.',
+  null, null,
+  '', '', '', '',
+  'draft', 3
+),
+(
+  'Black Friday Oriba', 'campanha-black-friday', 'Campanha', 2021, 'Oriba', null,
+  '/placeholders/campanha-black-friday-capa.svg', 'Capa da Campanha Black Friday.',
+  '/placeholders/campanha-black-friday-hover.svg', 'Segunda peça da Campanha Black Friday.',
+  'Cliente de varejo pedindo campanha de Black Friday — a data mais disputada do calendário publicitário, onde toda concorrente grita "desconto" ao mesmo tempo, no mesmo tom, com a mesma urgência artificial.',
+  'Ser ouvida numa data em que todo mundo compete pelo mesmo segundo de atenção com o mesmo argumento (preço), sem verba para brigar por espaço de mídia com os grandes.',
+  'Em vez de gritar desconto mais alto, mudei o ângulo: a campanha assumiu um tom de humor direto sobre o próprio exagero da data, criando identificação em vez de disputar decibéis com concorrente maior.',
+  'Campanha se destacou no feed do cliente em meio ao ruído sazonal típico da data, com peças compartilhadas organicamente — resultado difícil de comprar só com verba de mídia.',
+  'published', 4
+),
+(
   'DETRAN Segurança no Trânsito', 'detran-seguranca-no-transito', 'Campanha institucional', 2020, 'DETRAN-PR', null,
   '/placeholders/detran-seguranca-no-transito-capa.svg', 'Capa da campanha DETRAN Segurança no Trânsito.',
   '/placeholders/detran-seguranca-no-transito-hover.svg', 'Segunda peça da campanha DETRAN Segurança no Trânsito.',
@@ -59,7 +76,17 @@ insert into public.projects (
   'Fazer o motorista prestar atenção de novo num assunto sobre o qual ele já acha que sabe tudo, sem apelar para choque gratuito nem culpa vazia.',
   'Troquei o número frio pela cena reconhecível: situações cotidianas de trânsito contadas do ponto de vista de quem quase perdeu alguém, aproximando o risco estatístico da experiência real de quem dirige em Curitiba.',
   'Campanha ampliou o alcance da mensagem de segurança no trânsito nos canais do órgão, reforçando a comunicação institucional do DETRAN-PR como referência de tom mais humano no setor público.',
-  'published', 3
+  'published', 5
+),
+(
+  'Ditados que Salvam', 'cartazes-outubro-rosa', 'Cartazes', 2019, null, null,
+  '/placeholders/cartazes-outubro-rosa-capa.svg', 'Capa da série de cartazes Ditados que Salvam (Outubro Rosa).',
+  '/placeholders/cartazes-outubro-rosa-hover.svg', 'Segunda peça da série Ditados que Salvam (Outubro Rosa).',
+  'Campanha interna de conscientização para o Outubro Rosa, pensada para circular em ambiente corporativo — mural, intranet, comunicação impressa — onde a mensagem de prevenção precisa competir com o volume normal de aviso de RH.',
+  'Falar de prevenção ao câncer de mama sem cair no cartaz genérico de laço rosa que todo mundo já aprendeu a ignorar em outubro.',
+  'Uma série de cartazes com texto curto e direto, cada um focado numa atitude prática de prevenção — não em estatística de medo, mas em ação que a pessoa consegue tomar naquele mesmo dia.',
+  'Série adotada como padrão de comunicação interna para a campanha, com boa lembrança entre colaboradores nos anos seguintes — sinal de que cartaz direto funciona melhor que cartaz bonito e vazio.',
+  'published', 6
 ),
 (
   'Insight — Campanha contra o Racismo', 'insight-campanha-contra-racismo', 'Campanha institucional', 2020, null, null,
@@ -69,27 +96,7 @@ insert into public.projects (
   'Dizer algo sobre racismo que não fosse discurso pronto — sem citação genérica, sem imagem de banco de dados, sem parecer só mais uma marca tentando marcar posição por marcar.',
   'Parti de um insight simples e desconfortável: racismo não é só ato explícito, é também o que a sociedade normaliza caladamente. A campanha usou isso como fio condutor — texto direto, sem eufemismo, tratando o tema com o peso que ele exige.',
   'Repercussão orgânica acima do esperado para uma campanha institucional sem grande verba de mídia — prova de que insight verdadeiro viaja mais longe do que orçamento de impulsionamento.',
-  'published', 4
-),
-(
-  'Campanha Black Friday', 'campanha-black-friday', 'Campanha', 2021, 'Varejo', null,
-  '/placeholders/campanha-black-friday-capa.svg', 'Capa da Campanha Black Friday.',
-  '/placeholders/campanha-black-friday-hover.svg', 'Segunda peça da Campanha Black Friday.',
-  'Cliente de varejo pedindo campanha de Black Friday — a data mais disputada do calendário publicitário, onde toda concorrente grita "desconto" ao mesmo tempo, no mesmo tom, com a mesma urgência artificial.',
-  'Ser ouvida numa data em que todo mundo compete pelo mesmo segundo de atenção com o mesmo argumento (preço), sem verba para brigar por espaço de mídia com os grandes.',
-  'Em vez de gritar desconto mais alto, mudei o ângulo: a campanha assumiu um tom de humor direto sobre o próprio exagero da data, criando identificação em vez de disputar decibéis com concorrente maior.',
-  'Campanha se destacou no feed do cliente em meio ao ruído sazonal típico da data, com peças compartilhadas organicamente — resultado difícil de comprar só com verba de mídia.',
-  'published', 5
-),
-(
-  'Cartazes Outubro Rosa', 'cartazes-outubro-rosa', 'Cartazes', 2019, null, null,
-  '/placeholders/cartazes-outubro-rosa-capa.svg', 'Capa da série de cartazes Outubro Rosa.',
-  '/placeholders/cartazes-outubro-rosa-hover.svg', 'Segunda peça da série de cartazes Outubro Rosa.',
-  'Campanha interna de conscientização para o Outubro Rosa, pensada para circular em ambiente corporativo — mural, intranet, comunicação impressa — onde a mensagem de prevenção precisa competir com o volume normal de aviso de RH.',
-  'Falar de prevenção ao câncer de mama sem cair no cartaz genérico de laço rosa que todo mundo já aprendeu a ignorar em outubro.',
-  'Uma série de cartazes com texto curto e direto, cada um focado numa atitude prática de prevenção — não em estatística de medo, mas em ação que a pessoa consegue tomar naquele mesmo dia.',
-  'Série adotada como padrão de comunicação interna para a campanha, com boa lembrança entre colaboradores nos anos seguintes — sinal de que cartaz direto funciona melhor que cartaz bonito e vazio.',
-  'published', 6
+  'published', 7
 )
 on conflict (slug) do nothing;
 

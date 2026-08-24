@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Trophy } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { CrossfadeImage } from "@/components/motion/crossfade-image";
 import { formatMeta } from "@/lib/format";
@@ -15,9 +16,17 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
   return (
     <Link
       href={`/projetos/${project.slug}`}
-      className="group grid grid-cols-1 gap-6 rounded-none outline-none transition-colors duration-[350ms] ease-[cubic-bezier(0.3,0,0,1)] hover:bg-[#da9a9c] focus-visible:bg-[#da9a9c] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center lg:gap-12"
+      className="group grid grid-cols-1 gap-6 rounded-none outline-none transition-colors duration-[350ms] ease-[cubic-bezier(0.3,0,0,1)] hover:bg-black focus-visible:bg-black focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center lg:gap-12"
     >
       <div className="order-last pb-4 lg:order-first lg:py-8 lg:pl-8">
+        {project.award && (
+          <span className="mb-4 inline-flex items-center gap-1.5 border border-accent px-2.5 py-1 transition-colors duration-[350ms] group-hover:border-white/60 group-focus-visible:border-white/60">
+            <Trophy className="size-3.5 text-accent transition-colors duration-[350ms] group-hover:text-white group-focus-visible:text-white" strokeWidth={1.75} aria-hidden />
+            <span className="meta-text text-accent transition-colors duration-[350ms] group-hover:text-white group-focus-visible:text-white">
+              Vencedor · {project.award}
+            </span>
+          </span>
+        )}
         <h3 className="font-display text-3xl font-medium tracking-[-0.01em] text-foreground transition-colors duration-[350ms] group-hover:text-white group-focus-visible:text-white md:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
           {project.title}
         </h3>
