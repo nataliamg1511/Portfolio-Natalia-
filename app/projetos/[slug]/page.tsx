@@ -115,14 +115,14 @@ function SectionContent({ section }: { section: ProjectSection }) {
   }
 
   if (section.kind === "image") {
-    // Com enquadramento personalizado a imagem vive num crop 4:3 (o mesmo
-    // que o admin mostra ao arrastar); sem, respeita a proporção natural.
-    const cropped = section.position && section.position !== "50% 50%";
+    // O corte segue a proporção escolhida no admin; sem corte ("Original"),
+    // a imagem respeita a proporção natural do arquivo.
+    const ratioClass = section.aspect ? IMAGE_RATIO_CLASS[section.aspect] : null;
     return (
       <figure>
         <div className="group overflow-hidden bg-secondary">
-          {cropped ? (
-            <div className="relative aspect-[4/3] w-full">
+          {ratioClass ? (
+            <div className={cn("relative w-full", ratioClass)}>
               <Image
                 src={section.url}
                 alt={section.image_alt}
@@ -164,6 +164,15 @@ function SectionContent({ section }: { section: ProjectSection }) {
     </>
   );
 }
+
+/** Molduras de corte das imagens do case (aspect escolhido no admin). */
+const IMAGE_RATIO_CLASS: Record<string, string> = {
+  "1:1": "aspect-square",
+  "4:3": "aspect-[4/3]",
+  "3:4": "aspect-[3/4]",
+  "16:9": "aspect-video",
+  "9:16": "aspect-[9/16]",
+};
 
 const WIDTH_CLASS: Record<string, string> = {
   small: "max-w-md",

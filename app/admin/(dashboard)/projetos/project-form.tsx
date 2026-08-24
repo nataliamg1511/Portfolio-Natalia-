@@ -53,7 +53,14 @@ import { slugify } from "@/lib/slug";
 import { isVideoFileUrl } from "@/lib/video";
 import { uploadProjectImage, uploadProjectVideo, MAX_VIDEO_SIZE_MB } from "@/lib/supabase/upload";
 import { saveProjectAction, type ProjectFormState } from "@/app/admin/(dashboard)/projetos/form-actions";
-import type { CarouselItem, Project, SectionAlign, SectionLayout, VideoAspect } from "@/lib/types";
+import type {
+  CarouselItem,
+  Project,
+  SectionAlign,
+  SectionAspect,
+  SectionLayout,
+  VideoAspect,
+} from "@/lib/types";
 
 interface ProjectFormProps {
   project: Project | null;
@@ -71,9 +78,18 @@ interface SectionItem {
   layout: SectionLayout;
   align: SectionAlign;
   position: string;
-  aspect: VideoAspect;
+  aspect: SectionAspect;
   items: CarouselItem[];
 }
+
+/** Proporção numérica de cada corte de imagem (moldura do enquadramento). */
+const IMAGE_RATIO_VALUE: Record<string, number> = {
+  "1:1": 1,
+  "4:3": 4 / 3,
+  "3:4": 3 / 4,
+  "16:9": 16 / 9,
+  "9:16": 9 / 16,
+};
 
 const DEFAULT_SECTION_TITLES = ["Contexto do cliente", "O desafio", "A solução criativa", "O resultado"];
 
@@ -487,6 +503,7 @@ function SortableSectionCard({
     id: section.id,
   });
   const videoFileInputRef = useRef<HTMLInputElement>(null);
+  const imageSwapInputRef = useRef<HTMLInputElement>(null);
   const carouselImageInputRef = useRef<HTMLInputElement>(null);
   const carouselVideoInputRef = useRef<HTMLInputElement>(null);
   // Modo do bloco de vídeo: URL de arquivo já enviado abre na aba "Arquivo".
@@ -498,7 +515,21 @@ function SortableSectionCard({
   const [itemVideoDialogOpen, setItemVideoDialogOpen] = useState(false);
   // Índice do item de vídeo do carrossel que vai receber o arquivo enviado.
   const [pendingVideoItemIndex, setPendingVideoItemIndex] = useState<number | null>(null);
+  // Índice do item de imagem do carrossel sendo TROCADO (null = adicionar novo).
+  const [pendingImageItemIndex, setPendingImageItemIndex] = useState<number | null>(null);
   const uploading = busy === "video";
+
+  async function handleImageSwap(file: File) {
+    setBusy("image-swap");
+    const url = await uploadProjectImage(file, "gallery");
+    setBusy(null);
+    if (url) {
+      onUpdate(section.id, { url });
+      toast.success("Imagem trocada.");
+    } else {
+      toast.error("Não foi possível enviar a imagem. Conecte o Supabase (ver CLAUDE.md).");
+    }
+  }
 
   async function handleVideoUpload(file: File) {
     setBusy("video");
@@ -527,13 +558,20 @@ function SortableSectionCard({
   }
 
   async function handleCarouselImageUpload(file: File) {
-    setBusy("carousel-image");
+    const swapIndex = pendingImageItemIndex;
+    setPendingImageItemIndex(null);
+    setBusy(swapIndex === null ? "carousel-image" : `carousel-image-${swapIndex}`);
     const url = await uploadProjectImage(file, "gallery");
     setBusy(null);
     if (url) {
-      onUpdate(section.id, {
-        items: [...section.items, { type: "image", url, alt: "", aspect: "" }],
-      });
+      if (swapIndex === null) {
+        onUpdate(section.id, {
+          items: [...section.items, { type: "image", url, alt: "", aspect: "" }],
+        });
+      } else {
+        updateItem(swapIndex, { url });
+        toast.success("Imagem trocada.");
+      }
     } else {
       toast.error("Não foi possível enviar a imagem. Conecte o Supabase (ver CLAUDE.md).");
     }
@@ -681,28 +719,95 @@ function SortableSectionCard({
       )}
 
       {section.kind === "image" && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[220px_1fr]">
-          <div className="space-y-1.5">
-            <Label className="text-xs">Enquadramento</Label>
-            <ImagePositionPicker
-              imageUrl={section.url}
-              aspectRatio={4 / 3}
-              value={section.position}
-              onChange={(position) => onUpdate(section.id, { position })}
-              compact
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Corte da imagem</Label>
+              <Select
+                value={section.aspect || "original"}
+                onValueChange={(value) =>
+                  onUpdate(section.id, {
+                    aspect: value === "original" ? "" : (value as SectionAspect),
+                  })
+                }
+              >
+                <SelectTrigger size="sm" className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="original">Original (sem corte)</SelectItem>
+                  <SelectItem value="1:1">Quadrada (1:1)</SelectItem>
+                  <SelectItem value="4:3">Paisagem (4:3)</SelectItem>
+                  <SelectItem value="3:4">Retrato (3:4)</SelectItem>
+                  <SelectItem value="16:9">Widescreen (16:9)</SelectItem>
+                  <SelectItem value="9:16">Vertical (9:16)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <input
+              ref={imageSwapInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) handleImageSwap(file);
+              }}
             />
-            <p className="text-xs text-muted-foreground">
-              Centralizada, a imagem aparece inteira na proporção original; arrastando, entra no
-              crop 4:3 acima.
-            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy === "image-swap"}
+              onClick={() => imageSwapInputRef.current?.click()}
+            >
+              <ImagePlus className="size-4" />
+              {busy === "image-swap" ? "Enviando…" : "Trocar imagem"}
+            </Button>
           </div>
-          <div className="space-y-2">
-            <Label className="text-xs">Texto alternativo</Label>
-            <Input
-              value={section.image_alt}
-              onChange={(e) => onUpdate(section.id, { image_alt: e.target.value })}
-              placeholder="Descreva a imagem"
-            />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[220px_1fr]">
+            <div className="space-y-1.5">
+              {section.aspect ? (
+                <>
+                  <Label className="text-xs">Enquadramento no corte</Label>
+                  <ImagePositionPicker
+                    imageUrl={section.url}
+                    aspectRatio={IMAGE_RATIO_VALUE[section.aspect] ?? 4 / 3}
+                    value={section.position}
+                    onChange={(position) => onUpdate(section.id, { position })}
+                    compact
+                  />
+                </>
+              ) : (
+                <>
+                  <Label className="text-xs">Pré-visualização</Label>
+                  <div className="overflow-hidden rounded border border-border bg-secondary">
+                    {section.url && (
+                      <Image
+                        src={section.url}
+                        alt=""
+                        width={440}
+                        height={330}
+                        className="h-auto max-h-48 w-full object-contain"
+                      />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Sem corte, a imagem aparece inteira na proporção original.
+                  </p>
+                </>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Texto alternativo</Label>
+              <Input
+                value={section.image_alt}
+                onChange={(e) => onUpdate(section.id, { image_alt: e.target.value })}
+                placeholder="Descreva a imagem"
+              />
+            </div>
           </div>
         </div>
       )}
@@ -881,6 +986,20 @@ function SortableSectionCard({
                         placeholder="Texto alternativo"
                         className="h-8 text-xs"
                       />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        disabled={busy === `carousel-image-${itemIndex}`}
+                        onClick={() => {
+                          setPendingImageItemIndex(itemIndex);
+                          carouselImageInputRef.current?.click();
+                        }}
+                      >
+                        <ImagePlus className="size-3.5" />
+                        {busy === `carousel-image-${itemIndex}` ? "Enviando…" : "Trocar imagem"}
+                      </Button>
                     </>
                   ) : (
                     <>
@@ -935,14 +1054,22 @@ function SortableSectionCard({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) => e.target.files?.[0] && handleCarouselImageUpload(e.target.files[0])}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) handleCarouselImageUpload(file);
+            }}
           />
           <input
             ref={carouselVideoInputRef}
             type="file"
             accept="video/mp4,video/webm,video/quicktime"
             className="hidden"
-            onChange={(e) => e.target.files?.[0] && handleCarouselItemVideoUpload(e.target.files[0])}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) handleCarouselItemVideoUpload(file);
+            }}
           />
           <div className="flex flex-wrap gap-2">
             <Button
@@ -950,7 +1077,10 @@ function SortableSectionCard({
               variant="outline"
               size="sm"
               disabled={busy === "carousel-image"}
-              onClick={() => carouselImageInputRef.current?.click()}
+              onClick={() => {
+                setPendingImageItemIndex(null);
+                carouselImageInputRef.current?.click();
+              }}
             >
               <ImagePlus className="size-4" />
               {busy === "carousel-image" ? "Enviando…" : "Adicionar imagem"}

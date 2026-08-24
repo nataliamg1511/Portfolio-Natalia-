@@ -111,6 +111,9 @@ depender de nenhum backend configurado.
    - `supabase/migrations/0008_carrossel_e_orientacao.sql` (bloco `carousel`
      com itens em jsonb, orientação de vídeo `aspect` 16:9/9:16 e o tamanho
      `small` na caixa de largura dos blocos)
+   - `supabase/migrations/0009_crop_livre.sql` (corte de livre escolha nas
+     imagens do case: `aspect` aceita também 1:1/4:3/3:4; backfill de 4:3
+     nas imagens que já tinham enquadramento personalizado)
 
    Alternativa via CLI (se tiver o Supabase CLI instalado):
    ```bash
@@ -173,5 +176,8 @@ depender de nenhum backend configurado.
   leitura pública segue normal (`aspect`/`items` caem em fallback), mas
   salvar um projeto no admin falha — o insert usa `aspect`/`items` e os
   tipos/tamanhos novos (`carousel`, `small`). Rode a 0008 junto do deploy.
+- Idem `supabase/migrations/0009_crop_livre.sql`: sem ela, salvar uma imagem
+  com corte 1:1/4:3/3:4 falha no check de `aspect`. Rode a 0009 junto do
+  deploy (ela também faz o backfill que mantém o visual dos cases antigos).
 - O case "Aba CRM Unilever" entra como **rascunho** (sem conteúdo/artes) —
   a Natália preenche em `/admin/projetos` e publica quando tiver o material.

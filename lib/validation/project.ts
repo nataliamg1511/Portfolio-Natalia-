@@ -60,7 +60,7 @@ export const projectSectionSchema = z
     layout: z.enum(["small", "contained", "wide", "half", "full"]).optional(),
     align: z.enum(["left", "center", "right"]).optional().default("center"),
     position: positionSchema.optional().default("50% 50%"),
-    aspect: z.enum(["16:9", "9:16", ""]).optional().default(""),
+    aspect: z.enum(["16:9", "9:16", "1:1", "4:3", "3:4", ""]).optional().default(""),
     items: z.array(carouselItemSchema).optional().default([]),
   })
   .superRefine((section, ctx) => {

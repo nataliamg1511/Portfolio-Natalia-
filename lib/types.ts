@@ -21,6 +21,12 @@ export type SectionAlign = "left" | "center" | "right";
 /** Orientação de vídeo ("" = legado, tratado como horizontal 16:9). */
 export type VideoAspect = "16:9" | "9:16" | "";
 
+/**
+ * Proporção de corte de um bloco de mídia. Em vídeo, orientação do player
+ * (16:9/9:16). Em imagem, o crop escolhido — "" = original, sem corte.
+ */
+export type SectionAspect = "" | "16:9" | "9:16" | "1:1" | "4:3" | "3:4";
+
 /** Item de um bloco carrossel — imagem ou vídeo, exibidos lado a lado. */
 export interface CarouselItem {
   type: "image" | "video";
@@ -54,8 +60,8 @@ export interface ProjectSection {
   align: SectionAlign;
   /** `object-position` CSS ("X% Y%") da imagem (kind "image"). */
   position: string;
-  /** Orientação do vídeo (kind "video"). */
-  aspect: VideoAspect;
+  /** Orientação do vídeo (kind "video") ou corte da imagem (kind "image"). */
+  aspect: SectionAspect;
   /** Itens do carrossel (kind "carousel"). */
   items: CarouselItem[];
   display_order: number;

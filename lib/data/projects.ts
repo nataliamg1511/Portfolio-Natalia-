@@ -183,7 +183,7 @@ export interface ProjectSectionInput {
   layout: "small" | "contained" | "wide" | "half" | "full";
   align: "left" | "center" | "right";
   position: string;
-  aspect: "16:9" | "9:16" | "";
+  aspect: "16:9" | "9:16" | "1:1" | "4:3" | "3:4" | "";
   items: Array<{ type: "image" | "video"; url: string; alt: string; aspect: "16:9" | "9:16" | "" }>;
 }
 
@@ -227,7 +227,7 @@ export async function replaceProjectSections(projectId: string, sections: Projec
   if (insertError) {
     return {
       ok: false as const,
-      error: `${insertError.message} — se faltarem colunas ou um tipo/tamanho for rejeitado, rode supabase/migrations/0007_blocos_de_case.sql e 0008_carrossel_e_orientacao.sql no SQL Editor.`,
+      error: `${insertError.message} — se faltarem colunas ou um tipo/tamanho/corte for rejeitado, rode supabase/migrations/0007_blocos_de_case.sql, 0008_carrossel_e_orientacao.sql e 0009_crop_livre.sql no SQL Editor.`,
     };
   }
   return { ok: true as const };
@@ -376,7 +376,10 @@ function withDerivedImageSections(project: Project): Project {
     layout: "wide",
     align: "center",
     position: image.position || "50% 50%",
-    aspect: "",
+    // A galeria antiga era exibida com crop 4:3 quando tinha enquadramento
+    // personalizado — preserva esse visual (a migration 0009 faz o mesmo
+    // backfill nas linhas já migradas pro banco).
+    aspect: image.position && image.position !== "50% 50%" ? "4:3" : "",
     items: [],
     display_order: 0,
   });
