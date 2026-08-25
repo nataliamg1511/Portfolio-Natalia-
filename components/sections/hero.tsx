@@ -18,13 +18,6 @@ export function Hero() {
   return (
     <section className="container-editorial py-24 md:py-32 lg:py-40">
       <FadeIn>
-        <ul className="mb-6 flex flex-wrap gap-2" aria-label="Frentes de trabalho">
-          {EXPERTISE_TAGS.map((tag) => (
-            <li key={tag} className="meta-text border border-border px-3 py-1.5">
-              {tag}
-            </li>
-          ))}
-        </ul>
         <h1 className="font-display text-[2.75rem] leading-[1.05] font-medium tracking-[-0.02em] text-foreground md:text-[4.5rem]">
           Oi, eu sou a Natália.
           <br />
@@ -33,6 +26,13 @@ export function Hero() {
       </FadeIn>
       <FadeIn delay={0.08}>
         <div className="mt-8 flex flex-col items-start gap-5">
+          <ul className="flex flex-wrap gap-2" aria-label="Frentes de trabalho">
+            {EXPERTISE_TAGS.map((tag) => (
+              <li key={tag} className="meta-text border border-border px-3 py-1.5">
+                {tag}
+              </li>
+            ))}
+          </ul>
           <ArrowLink href="/sobre">Sobre mim</ArrowLink>
           <div className="flex items-center gap-4">
             <a
