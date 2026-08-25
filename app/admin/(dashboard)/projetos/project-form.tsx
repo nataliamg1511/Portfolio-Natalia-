@@ -322,11 +322,13 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
 
       <Separator />
 
-      {/* Imagens do card */}
+      {/* Capa/hover — usadas SÓ no card da página inicial */}
       <section className="space-y-5">
-        <h2 className="text-base font-semibold text-foreground">Imagens do card</h2>
+        <h2 className="text-base font-semibold text-foreground">Card da página inicial</h2>
         <p className="text-sm text-muted-foreground">
-          A imagem de hover aparece quando alguém passa o mouse sobre o card no site.
+          Estas duas imagens aparecem <strong>apenas no card da Home</strong> (a de hover, quando
+          alguém passa o mouse). A página do case em si é montada inteiramente pelos blocos da
+          seção &quot;Conteúdo do case&quot;, abaixo.
         </p>
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">

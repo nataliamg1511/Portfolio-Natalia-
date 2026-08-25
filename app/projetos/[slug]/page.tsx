@@ -7,7 +7,6 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Separator } from "@/components/ui/separator";
 import { FadeIn } from "@/components/motion/fade-in";
-import { ParallaxCover } from "@/components/motion/parallax-cover";
 import { CaseCarousel } from "@/components/sections/case-carousel";
 import { RichText } from "@/components/rich-text";
 import { cn } from "@/lib/utils";
@@ -271,7 +270,9 @@ export default async function ProjectPage({ params }: PageProps) {
     <>
       <SiteHeader />
       <main id="main-content">
-        <header className="container-editorial pt-16 pb-10 md:pt-24">
+        {/* A capa/hover são exclusivas do card da Home — a página do case é
+            montada inteiramente pelos blocos definidos no admin. */}
+        <header className="container-editorial border-b border-border pt-16 pb-12 md:pt-24 md:pb-16">
           <FadeIn>
             <p className="meta-text">
               {formatMeta([project.category, project.year, project.client])}
@@ -288,21 +289,7 @@ export default async function ProjectPage({ params }: PageProps) {
           </FadeIn>
         </header>
 
-        <FadeIn y={20} margin="-5% 0px">
-          <ParallaxCover className="relative mx-auto aspect-[16/10] w-full max-w-[1440px]">
-            <Image
-              src={project.cover_image_url}
-              alt={project.cover_image_alt}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
-              style={{ objectPosition: project.cover_image_position }}
-            />
-          </ParallaxCover>
-        </FadeIn>
-
-        <div className="py-12 md:py-16">
+        <div className="py-8 md:py-12">
           {items.map((item, index) => {
             if (item.type === "pair") {
               const [a, b] = item.sections;
