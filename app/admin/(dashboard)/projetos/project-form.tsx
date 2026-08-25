@@ -293,7 +293,7 @@ export function ProjectForm({ project, supabaseConfigured }: ProjectFormProps) {
             }}
             required
           />
-          <p className="text-xs text-muted-foreground">nataliamachado.com.br/projetos/{slug || "endereco-do-projeto"}</p>
+          <p className="text-xs text-muted-foreground">nataliamachado.vercel.app/projetos/{slug || "endereco-do-projeto"}</p>
           {state.fieldErrors?.slug && <FieldError message={state.fieldErrors.slug} />}
         </div>
 

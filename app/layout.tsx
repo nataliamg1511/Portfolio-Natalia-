@@ -25,7 +25,7 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["500"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nataliamachado.com.br";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nataliamachado.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
