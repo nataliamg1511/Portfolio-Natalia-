@@ -52,7 +52,10 @@ export function CaseCarousel({ items, label }: { items: CarouselItem[]; label?: 
         role="region"
         aria-label={label || "Carrossel de mídia do projeto"}
         tabIndex={0}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 outline-none focus-visible:ring-2 focus-visible:ring-ring [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        // first:ml-auto/last:mr-auto centraliza os itens quando eles cabem na
+        // faixa sem rolagem; com overflow as margens automáticas valem 0 e o
+        // scroll fica normal (justify-center cortaria o início do conteúdo).
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 outline-none focus-visible:ring-2 focus-visible:ring-ring [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*:first-child]:ml-auto [&>*:last-child]:mr-auto"
       >
         {items.map((item, index) => (
           <CarouselSlide key={index} item={item} index={index} />
