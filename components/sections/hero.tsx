@@ -6,6 +6,9 @@ import { FadeIn } from "@/components/motion/fade-in";
 const LINKEDIN_URL = "https://www.linkedin.com/in/natalia-machado-gumerato/";
 const EMAIL = "nataliamg.1511@gmail.com";
 
+/** Frentes de trabalho exibidas como tags acima do título do Hero. */
+const EXPERTISE_TAGS = ["Campanhas", "CRM", "Estratégia"];
+
 /**
  * Hero minimalista da Home — DESIGN_SYSTEM.md tokens `display` (Fraunces
  * 500, 72px desktop / 44px mobile, tracking -0.02em). Único elemento acima
@@ -15,10 +18,17 @@ export function Hero() {
   return (
     <section className="container-editorial py-24 md:py-32 lg:py-40">
       <FadeIn>
+        <ul className="mb-6 flex flex-wrap gap-2" aria-label="Frentes de trabalho">
+          {EXPERTISE_TAGS.map((tag) => (
+            <li key={tag} className="meta-text border border-border px-3 py-1.5">
+              {tag}
+            </li>
+          ))}
+        </ul>
         <h1 className="font-display text-[2.75rem] leading-[1.05] font-medium tracking-[-0.02em] text-foreground md:text-[4.5rem]">
           Oi, eu sou a Natália.
           <br />
-          Redatora e Copywriter.
+          Creative Copywriter.
         </h1>
       </FadeIn>
       <FadeIn delay={0.08}>
