@@ -67,7 +67,7 @@ export default async function ContatoPage() {
           </FadeIn>
           <FadeIn delay={0.06}>
             <p className="mt-6 max-w-lg text-[1.25rem] leading-[1.6] text-muted-foreground">
-              Me chama no WhatsApp, escreve pelo LinkedIn ou manda um e-mail — respondo assim que ler.
+              Me chama no WhatsApp, escreve pelo LinkedIn ou manda um e-mail (respondo rapidinho)
             </p>
           </FadeIn>
         </section>
