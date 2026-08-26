@@ -6,8 +6,8 @@ import { FadeIn } from "@/components/motion/fade-in";
 const LINKEDIN_URL = "https://www.linkedin.com/in/natalia-machado-gumerato/";
 const EMAIL = "nataliamg.1511@gmail.com";
 
-/** Frentes de trabalho exibidas como tags acima do título do Hero. */
-const EXPERTISE_TAGS = ["Campanhas", "CRM", "Estratégia"];
+/** Frentes de trabalho exibidas como tags no Hero. */
+const EXPERTISE_TAGS = ["Campanhas", "CRM", "Estratégia", "SEO", "GEO"];
 
 /**
  * Hero minimalista da Home — DESIGN_SYSTEM.md tokens `display` (Fraunces
