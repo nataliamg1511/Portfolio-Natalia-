@@ -136,8 +136,8 @@ function ArrowButton({ direction, onClick }: { direction: "left" | "right"; onCl
       onClick={onClick}
       aria-label={direction === "left" ? "Item anterior" : "Próximo item"}
       className={cn(
-        "absolute top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-foreground shadow-md ring-1 ring-border transition-opacity hover:bg-background md:flex",
-        direction === "left" ? "left-3" : "right-3"
+        "absolute top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-foreground shadow-md ring-1 ring-border transition-opacity hover:bg-background md:size-10",
+        direction === "left" ? "left-2 md:left-3" : "right-2 md:right-3"
       )}
     >
       <Icon className="size-5" aria-hidden />
