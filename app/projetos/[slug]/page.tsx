@@ -11,7 +11,7 @@ import { CaseCarousel } from "@/components/sections/case-carousel";
 import { RichText } from "@/components/rich-text";
 import { cn } from "@/lib/utils";
 import { formatMeta, truncateForMeta } from "@/lib/format";
-import { getVideoEmbedUrl, isVideoFileUrl } from "@/lib/video";
+import { getVideoEmbedUrl, isVideoFileUrl, videoPreviewSrc } from "@/lib/video";
 import { getProjectBySlug, getPublishedProjects } from "@/lib/data/projects";
 import type { ProjectSection } from "@/lib/types";
 
@@ -61,7 +61,7 @@ function SectionContent({ section }: { section: ProjectSection }) {
       return (
         <figure className={frameWrap}>
           <video
-            src={section.url}
+            src={videoPreviewSrc(section.url)}
             controls
             playsInline
             preload="metadata"

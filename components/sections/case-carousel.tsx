@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getVideoEmbedUrl, isVideoFileUrl } from "@/lib/video";
+import { getVideoEmbedUrl, isVideoFileUrl, videoPreviewSrc } from "@/lib/video";
 import type { CarouselItem } from "@/lib/types";
 
 /**
@@ -87,7 +87,7 @@ function CarouselSlide({ item, index }: { item: CarouselItem; index: number }) {
       return (
         <div className={frame}>
           <video
-            src={item.url}
+            src={videoPreviewSrc(item.url)}
             controls
             playsInline
             preload="metadata"

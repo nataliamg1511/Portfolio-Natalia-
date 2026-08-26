@@ -17,6 +17,15 @@ export function isVideoFileUrl(url: string): boolean {
   }
 }
 
+/**
+ * Fonte do <video> com fragmento `#t=0.001`: força o navegador (em especial
+ * o Safari do iOS e o Chrome Android, que não pintam nada com só
+ * `preload="metadata"`) a buscar o primeiro quadro e exibi-lo como preview.
+ */
+export function videoPreviewSrc(url: string): string {
+  return url.includes("#") ? url : `${url}#t=0.001`;
+}
+
 export function getVideoEmbedUrl(url: string): string | null {
   let parsed: URL;
   try {
