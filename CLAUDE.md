@@ -40,6 +40,7 @@ app/
 │       ├── projetos/            # lista, novo, [id], form, server actions
 │       ├── clientes/            # lista + form de logos (sem página de edição)
 │       └── sobre/                # editar bio/foto/contatos
+├── api/ping/route.ts            # keep-alive do Supabase (chamado pelo cron da Vercel)
 ├── sitemap.ts / robots.ts
 components/
 ├── layout/        # header, footer públicos
@@ -79,6 +80,24 @@ modos, decididos por `lib/supabase/is-configured.ts`:
 
 Isso significa que `npm run dev` já mostra o site completo hoje, sem
 depender de nenhum backend configurado.
+
+## Keep-alive do Supabase (ping diário)
+
+O plano gratuito do Supabase pausa o projeto após 7 dias sem atividade no
+banco. Como as páginas públicas usam `revalidate`, sem visitas ninguém
+consulta o Postgres. Para evitar a pausa:
+
+- `app/api/ping/route.ts` faz uma leitura real em `projects` e responde
+  `{ ok: true, supabase: "alive" }` (ou 503 se o banco não responder).
+- `vercel.json` agenda um cron da Vercel que chama `/api/ping` todo dia às
+  09:00 UTC (o plano Hobby permite no máximo uma execução por dia). Crons só
+  rodam no deploy de **produção**; o histórico fica em **Settings → Cron
+  Jobs** no painel da Vercel.
+- `CRON_SECRET` (opcional): se definida nas variáveis da Vercel, a rota passa
+  a exigir `Authorization: Bearer <valor>`, que o cron envia sozinho.
+
+O ping **não reativa** um projeto já pausado — nesse caso é preciso clicar em
+"Restore project" no painel do Supabase uma vez; depois o cron mantém ativo.
 
 ## Como conectar o Supabase real (quando a Natália criar a conta)
 
