@@ -1,0 +1,44 @@
+name: Supabase keep-alive
+
+# Segundo agendador, independente dos crons da Vercel (vercel.json): chama a
+# rota /api/ping do site em produção, que faz leituras reais no Supabase e
+# impede a pausa por inatividade do plano gratuito.
+on:
+  schedule:
+    - cron: "23 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping do Supabase via site
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'https://nataliamachado.vercel.app' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          for attempt in 1 2 3; do
+            status=$(curl -sS -m 60 -o body.json -w "%{http_code}" \
+              -H "x-keepalive-source: github-actions" \
+              ${CRON_SECRET:+-H "Authorization: Bearer $CRON_SECRET"} \
+              "$SITE_URL/api/ping" || echo "000")
+            echo "tentativa $attempt: HTTP $status $(cat body.json 2>/dev/null)"
+            if [ "$status" = "200" ] && grep -q '"supabase":"alive"' body.json; then
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "::error::O Supabase não respondeu. Se o projeto foi pausado, clique em Resume project no painel do Supabase."
+          exit 1
+
+      # O GitHub desliga workflows agendados após 60 dias sem atividade no
+      # repositório; reabilitar o próprio workflow zera esse contador.
+      - name: Manter o agendamento ativo
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable supabase-keepalive.yml --repo "$GITHUB_REPOSITORY" || true

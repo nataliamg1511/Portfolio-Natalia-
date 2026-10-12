@@ -40,7 +40,7 @@ app/
 │       ├── projetos/            # lista, novo, [id], form, server actions
 │       ├── clientes/            # lista + form de logos (sem página de edição)
 │       └── sobre/                # editar bio/foto/contatos
-├── api/ping/route.ts            # keep-alive do Supabase (chamado pelo cron da Vercel)
+├── api/ping/route.ts            # keep-alive do Supabase (crons da Vercel + GitHub Actions)
 ├── sitemap.ts / robots.ts
 components/
 ├── layout/        # header, footer públicos
@@ -81,23 +81,37 @@ modos, decididos por `lib/supabase/is-configured.ts`:
 Isso significa que `npm run dev` já mostra o site completo hoje, sem
 depender de nenhum backend configurado.
 
-## Keep-alive do Supabase (ping diário)
+## Keep-alive do Supabase (ping várias vezes ao dia)
 
-O plano gratuito do Supabase pausa o projeto após 7 dias sem atividade no
-banco. Como as páginas públicas usam `revalidate`, sem visitas ninguém
-consulta o Postgres. Para evitar a pausa:
+O plano gratuito do Supabase pausa o projeto quando ele não recebe "algumas
+requisições de usuário ao banco por dia" ao longo de 7 dias. Como as páginas
+públicas usam `revalidate`, sem visitas ninguém consulta o Postgres. A
+primeira versão (uma leitura por dia) **não bastou** — o projeto continuou
+pausando. Hoje são ~10 chamadas por dia, cada uma com 4 leituras:
 
-- `app/api/ping/route.ts` faz uma leitura real em `projects` e responde
-  `{ ok: true, supabase: "alive" }` (ou 503 se o banco não responder).
-- `vercel.json` agenda um cron da Vercel que chama `/api/ping` todo dia às
-  09:00 UTC (o plano Hobby permite no máximo uma execução por dia). Crons só
-  rodam no deploy de **produção**; o histórico fica em **Settings → Cron
-  Jobs** no painel da Vercel.
+- `app/api/ping/route.ts` lê `projects`, `project_sections`, `about` e
+  `clients` e responde `{ ok: true, supabase: "alive", queries: 4 }` (503 só
+  se nenhuma consulta chegar ao banco). Cada chamada loga a origem
+  (`[ping] origem=...`) nos logs da Vercel.
+- `vercel.json` agenda 6 crons da Vercel no mesmo path, de 4 em 4 horas (o
+  plano Hobby limita cada cron a uma execução por dia, mas aceita vários
+  crons). Crons só rodam no deploy de **produção**; o histórico fica em
+  **Settings → Cron Jobs** no painel da Vercel.
+- `.github/workflows/supabase-keepalive.yml` é um segundo agendador,
+  independente da Vercel: a cada 4 horas o GitHub Actions chama `/api/ping`
+  do site em produção e falha (com e-mail do GitHub) se o banco não
+  responder. O histórico fica na aba **Actions** do repositório; dá para
+  rodar na hora em **Run workflow**. A URL vem da variável de repositório
+  `SITE_URL` (padrão `https://nataliamachado.vercel.app`) — atualize se o
+  domínio mudar.
 - `CRON_SECRET` (opcional): se definida nas variáveis da Vercel, a rota passa
-  a exigir `Authorization: Bearer <valor>`, que o cron envia sozinho.
+  a exigir `Authorization: Bearer <valor>`, que o cron da Vercel envia
+  sozinho. Nesse caso crie também o secret `CRON_SECRET` no GitHub, senão o
+  workflow recebe 401.
 
 O ping **não reativa** um projeto já pausado — nesse caso é preciso clicar em
-"Restore project" no painel do Supabase uma vez; depois o cron mantém ativo.
+"Resume project" no painel do Supabase uma vez; depois os agendadores mantêm
+ativo. A única garantia formal contra a pausa é o plano Pro do Supabase.
 
 ## Como conectar o Supabase real (quando a Natália criar a conta)
 
